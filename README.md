@@ -33,9 +33,9 @@ aerlift/
 │   │       ├── aranet.py
 │   │       ├── lascar.py
 │   │       ├── hhb.R            # uses astr package
-│   │       ├── hhb_to_nc.py
+│   │       ├── hhb.py
 │   │       ├── upas.R           # uses astr package
-│   │       └── upas_to_nc.py
+│   │       └── upas.py
 │   └── envs/
 │       └── munge.yaml
 ├── notebooks/               # visualization & exploration (read-only consumers)
