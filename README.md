@@ -144,5 +144,7 @@ the physical sensors installed in each HHB unit for a given campaign.
 ## Contact
 
 Mark Campmier, PhD — UC Berkeley School of Public Health
+
 Professor Ajay Pillarisetti — UC Berkeley School of Public Health
+
 BIRCHE³ Lab / Division of Environmental Health Sciences
