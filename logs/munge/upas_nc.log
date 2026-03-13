@@ -1,0 +1,4 @@
+2026-03-13 10:42:58,183 INFO Starting UPAS NetCDF conversion
+2026-03-13 10:42:58,267 INFO 17224 records, 1 sensors
+2026-03-13 10:42:58,488 INFO Wrote /Users/markcampmier/Library/Mobile Documents/com~apple~CloudDocs/aerlift/data/1_munged/upas_summary.csv
+2026-03-13 10:42:58,726 INFO Wrote /Users/markcampmier/Library/Mobile Documents/com~apple~CloudDocs/aerlift/data/1_munged/upas.nc

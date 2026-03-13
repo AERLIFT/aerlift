@@ -1,0 +1,178 @@
+from pathlib import Path
+from datetime import datetime, timezone
+import logging
+import pandas as pd
+import numpy as np
+
+# ── dev shim ──────────────────────────────────────────────────────────────────
+try:
+    snakemake
+except NameError:
+    class snakemake:
+        class params:
+            timezone = 'America/Los_Angeles'
+        class input:
+            csv = '/Users/markcampmier/Library/Mobile Documents/com~apple~CloudDocs/aerlift/data/1_munged/upas_intermediate.csv'
+        class output:
+            nc  = '/Users/markcampmier/Library/Mobile Documents/com~apple~CloudDocs/aerlift/data/1_munged/upas.nc'
+            csv = '/Users/markcampmier/Library/Mobile Documents/com~apple~CloudDocs/aerlift/data/1_munged/upas_summary.csv'
+        log = ['/dev/null']
+
+# ── logging ───────────────────────────────────────────────────────────────────
+logging.basicConfig(
+    filename=snakemake.log[0],
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(message)s"
+)
+log = logging.getLogger(__name__)
+
+# ── functions ─────────────────────────────────────────────────────────────────
+def load_upas(input_csv, timezone):
+    df = pd.read_csv(input_csv)
+
+    # datetime
+    df.loc[:, 'DateTimeUTC'] = (pd.to_datetime(df['DateTimeUTC'], format='mixed')
+                  .dt.tz_localize('UTC')
+                  .dt.tz_localize(None))
+
+    df = df.rename(columns={
+        'DateTimeUTC': 'datetime',
+        'UPASserial': 'sensor',
+        'AtmoT': 'upas_atmo_temperature',
+        'AtmoP': 'upas_atmo_pressure',
+        'AtmoRH': 'upas_atmo_rh',
+        'AtmoDensity': 'upas_atmo_density',
+        'AtmoAlt': 'upas_atmo_altitude',
+        'AccelX': 'upas_accel_x',
+        'AccelY': 'upas_accel_y',
+        'AccelZ': 'upas_accel_z',
+        'StepCount': 'upas_step_count',
+        'LUX': 'upas_lux',
+        'UVindex': 'upas_uv_index',
+        'HighVisRaw': 'upas_high_vis_raw',
+        'LowVisRaw': 'upas_low_vis_raw',
+        'IRRaw': 'upas_ir_raw',
+        'UVRaw': 'upas_uv_raw',
+        'PMMeasCnt': 'upas_pm_meas_count',
+        'PM1MC': 'upas_pm1_mc',
+        'PM1MCVar': 'upas_pm1_mc_var',
+        'PM2_5MC': 'upas_pm25_mc',
+        'PM2_5MCVar': 'upas_pm25_mc_var',
+        'PM4MC': 'upas_pm4_mc',
+        'PM4MCVar': 'upas_pm4_mc_var',
+        'PM10MC': 'upas_pm10_mc',
+        'PM10MCVar': 'upas_pm10_mc_var',
+        'PM0_5NC': 'upas_pm05_nc',
+        'PM0_5NCVar': 'upas_pm05_nc_var',
+        'PM1NC': 'upas_pm1_nc',
+        'PM1NCVar': 'upas_pm1_nc_var',
+        'PM2_5NC': 'upas_pm25_nc',
+        'PM2_5NCVar': 'upas_pm25_nc_var',
+        'PM4NC': 'upas_pm4_nc',
+        'PM4NCVar': 'upas_pm4_nc_var',
+        'PM10NC': 'upas_pm10_nc',
+        'PM10NCVar': 'upas_pm10_nc_var',
+        'PMtypicalParticleSize': 'upas_pm_typical_size',
+        'PMtypicalParticleSizeVar': 'upas_pm_typical_size_var',
+        'PM2_5SampledMassOffset': 'upas_pm25_sampled_mass',
+        'CO2': 'upas_co2',
+        'SCDT': 'upas_scd_temperature',
+        'SCDRH': 'upas_scd_rh',
+        'VOCRaw': 'upas_voc_raw',
+        'NOXRaw': 'upas_nox_raw',
+    })
+
+    df = df.set_index('datetime')
+
+    return df
+
+def add_metadata(ds, params):
+    ds.attrs = {
+        'campaign':       'AERLIFT',
+        'instrument':     'UPAS',
+        'stage':          'munged',
+        'created':        datetime.now().isoformat(),
+        'script':         'workflow/scripts/munge/upas_to_nc.py',
+        'timezone_local': params.timezone,
+        'time_reference': 'UTC',
+        'Conventions':    'CF-1.8',
+        'institution':    'UC Berkeley School of Public Health',
+        'creator_name':   'Mark Campmier, PhD',
+    }
+    # met
+    ds['upas_atmo_temperature'].attrs = {'long_name': 'atmospheric temperature',       'units': 'degC'}
+    ds['upas_atmo_pressure'].attrs    = {'long_name': 'atmospheric pressure',          'units': 'hPa'}
+    ds['upas_atmo_rh'].attrs          = {'long_name': 'atmospheric relative humidity', 'units': '%'}
+    ds['upas_atmo_density'].attrs     = {'long_name': 'atmospheric density',           'units': 'kg/m3'}
+    ds['upas_atmo_altitude'].attrs    = {'long_name': 'atmospheric altitude',          'units': 'm'}
+    # PM mass conc
+    ds['upas_pm1_mc'].attrs           = {'long_name': 'PM1.0 mass concentration',      'units': 'ug/m3'}
+    ds['upas_pm25_mc'].attrs          = {'long_name': 'PM2.5 mass concentration',      'units': 'ug/m3'}
+    ds['upas_pm4_mc'].attrs           = {'long_name': 'PM4.0 mass concentration',      'units': 'ug/m3'}
+    ds['upas_pm10_mc'].attrs          = {'long_name': 'PM10 mass concentration',       'units': 'ug/m3'}
+    # PM number conc
+    ds['upas_pm05_nc'].attrs          = {'long_name': 'PM0.5 number concentration',    'units': '#/cm3'}
+    ds['upas_pm1_nc'].attrs           = {'long_name': 'PM1.0 number concentration',    'units': '#/cm3'}
+    ds['upas_pm25_nc'].attrs          = {'long_name': 'PM2.5 number concentration',    'units': '#/cm3'}
+    ds['upas_pm4_nc'].attrs           = {'long_name': 'PM4.0 number concentration',    'units': '#/cm3'}
+    ds['upas_pm10_nc'].attrs          = {'long_name': 'PM10 number concentration',     'units': '#/cm3'}
+    # integrated
+    ds['upas_pm25_sampled_mass'].attrs= {'long_name': 'PM2.5 sampled mass offset',     'units': 'ug'}
+    # light
+    ds['upas_lux'].attrs              = {'long_name': 'illuminance',                   'units': 'lux'}
+    ds['upas_uv_index'].attrs         = {'long_name': 'UV index',                      'units': '1'}
+    ds['upas_high_vis_raw'].attrs     = {'long_name': 'high visibility raw signal',    'units': '1'}
+    ds['upas_low_vis_raw'].attrs      = {'long_name': 'low visibility raw signal',     'units': '1'}
+    ds['upas_ir_raw'].attrs           = {'long_name': 'infrared raw signal',           'units': '1'}
+    ds['upas_uv_raw'].attrs           = {'long_name': 'UV raw signal',                 'units': '1'}
+    # motion
+    ds['upas_accel_x'].attrs          = {'long_name': 'accelerometer x-axis',          'units': 'mg'}
+    ds['upas_accel_y'].attrs          = {'long_name': 'accelerometer y-axis',          'units': 'mg'}
+    ds['upas_accel_z'].attrs          = {'long_name': 'accelerometer z-axis',          'units': 'mg'}
+    ds['upas_step_count'].attrs       = {'long_name': 'step count',                    'units': '1'}
+    # CO2 / gases
+    for v, ln, u in [
+        ('upas_co2',             'CO2 mixing ratio',        'ppm'),
+        ('upas_scd_temperature', 'SCD30 temperature',       'degC'),
+        ('upas_scd_rh',          'SCD30 relative humidity', '%'),
+        ('upas_voc_raw',         'raw VOC index signal',    '1'),
+        ('upas_nox_raw',         'raw NOx index signal',    '1'),
+    ]:
+        if v in ds:
+            ds[v].attrs = {'long_name': ln, 'units': u}
+    return ds
+
+# ── main ──────────────────────────────────────────────────────────────────────
+log.info("Starting UPAS NetCDF conversion")
+
+df = load_upas(snakemake.input.csv, timezone=snakemake.params.timezone)
+log.info(f"{len(df)} records, {df['sensor'].nunique()} sensors")
+
+ds_upas = (df.reset_index()
+            .infer_objects()
+            .set_index(['sensor', 'datetime'])
+            .to_xarray())
+ds_upas = add_metadata(ds_upas, snakemake.params)
+
+# summary csv
+summary = pd.DataFrame({
+    'n_records':  [ds_upas.sizes['datetime']],
+    'n_sensors':  [ds_upas.sizes['sensor']],
+    'pm25_mean':  [float(ds_upas['upas_pm25_mc'].mean())],
+    'pm25_max':   [float(ds_upas['upas_pm25_mc'].max())],
+    'temp_mean':  [float(ds_upas['upas_atmo_temperature'].mean())],
+    'rh_mean':    [float(ds_upas['upas_atmo_rh'].mean())],
+})
+summary.to_csv(snakemake.output.csv, index=False)
+log.info(f"Wrote {snakemake.output.csv}")
+
+# netcdf
+out_path = Path(snakemake.output.nc)
+out_path.parent.mkdir(parents=True, exist_ok=True)
+num_vars = [v for v in ds_upas.data_vars
+            if ds_upas[v].dtype in [np.float32, np.float64, np.int32, np.int64]]
+ds_upas.to_netcdf(
+    out_path,
+    encoding={v: {'zlib': True, 'complevel': 4} for v in num_vars}
+)
+log.info(f"Wrote {out_path}")

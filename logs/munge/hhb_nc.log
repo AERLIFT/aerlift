@@ -1,0 +1,4 @@
+2026-03-13 10:10:10,198 INFO Starting HHB NetCDF conversion
+2026-03-13 10:10:10,227 INFO 7681 records, 1 sensors
+2026-03-13 10:10:10,431 INFO Wrote /Users/markcampmier/Library/Mobile Documents/com~apple~CloudDocs/aerlift/data/1_munged/hhb_summary.csv
+2026-03-13 10:10:10,511 INFO Wrote /Users/markcampmier/Library/Mobile Documents/com~apple~CloudDocs/aerlift/data/1_munged/hhb.nc

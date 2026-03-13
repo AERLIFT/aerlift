@@ -1,0 +1,4 @@
+2026-03-12 14:27:30,711 INFO Starting Lascar munging
+2026-03-12 14:27:30,768 INFO Dropped 0 duplicate rows, 4387 records remain
+2026-03-12 14:27:30,975 INFO Wrote /Users/markcampmier/Library/Mobile Documents/com~apple~CloudDocs/aerlift/data/1_munged/lascar_summary.csv
+2026-03-12 14:27:31,116 INFO Wrote /Users/markcampmier/Library/Mobile Documents/com~apple~CloudDocs/aerlift/data/1_munged/lascar.nc

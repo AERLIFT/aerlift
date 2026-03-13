@@ -1,0 +1,10 @@
+Starting HHB munging at 2026-03-13 09:33:31.585262
+raw_dir: /Users/markcampmier/Library/Mobile Documents/com~apple~CloudDocs/aerlift/data/0_raw
+timezone: America/Los_Angeles
+cols_keep: DateTimeUTC, HHBserial, SampleName, SEN55_PM1.0, SEN55_PM2.5, SEN55_PM4.0, SEN55_PM10, SEN55_RH, SEN55_Temp, SEN55_RawVOC, SEN55_RawNOx, G.SCD30_CO2, G.Alphasense1_Algorithm1, G.Alphasense2_Algorithm1
+Found 1 files:
+/Users/markcampmier/Library/Mobile Documents/com~apple~CloudDocs/aerlift/data/0_raw/hhb/HHB00112_LOG_2025-08-01T23_00UTC.csv
+Reading: /Users/markcampmier/Library/Mobile Documents/com~apple~CloudDocs/aerlift/data/0_raw/hhb/HHB00112_LOG_2025-08-01T23_00UTC.csv
+Combined df dimensions: 7681 rows x 14 cols
+Columns: DateTimeUTC, HHBserial, SampleName, SEN55_PM1.0, SEN55_PM2.5, SEN55_PM4.0, SEN55_PM10, SEN55_RH, SEN55_Temp, SEN55_RawVOC, SEN55_RawNOx, G.SCD30_CO2, G.Alphasense1_Algorithm1, G.Alphasense2_Algorithm1
+Wrote: /Users/markcampmier/Library/Mobile Documents/com~apple~CloudDocs/aerlift/data/1_munged/hhb_intermediate.csv

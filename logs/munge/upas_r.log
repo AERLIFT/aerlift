@@ -1,0 +1,11 @@
+Starting UPAS munging at 2026-03-13 10:32:13.539086
+raw_dir: /Users/markcampmier/Library/Mobile Documents/com~apple~CloudDocs/aerlift/data/0_raw
+Found 3 files:
+/Users/markcampmier/Library/Mobile Documents/com~apple~CloudDocs/aerlift/data/0_raw/upas/PSP00054_LOG_2022-09-06T19_37_17UTC_E102____________C3798_____.txt
+/Users/markcampmier/Library/Mobile Documents/com~apple~CloudDocs/aerlift/data/0_raw/upas/PSP00054_LOG_2022-09-13T18_57_39UTC_E103____________C3858_____.txt
+/Users/markcampmier/Library/Mobile Documents/com~apple~CloudDocs/aerlift/data/0_raw/upas/PSP00054_LOG_2022-09-17T21_59_27UTC_E106____________C3805_____.txt
+Reading: /Users/markcampmier/Library/Mobile Documents/com~apple~CloudDocs/aerlift/data/0_raw/upas/PSP00054_LOG_2022-09-06T19_37_17UTC_E102____________C3798_____.txt
+Reading: /Users/markcampmier/Library/Mobile Documents/com~apple~CloudDocs/aerlift/data/0_raw/upas/PSP00054_LOG_2022-09-13T18_57_39UTC_E103____________C3858_____.txt
+Reading: /Users/markcampmier/Library/Mobile Documents/com~apple~CloudDocs/aerlift/data/0_raw/upas/PSP00054_LOG_2022-09-17T21_59_27UTC_E106____________C3805_____.txt
+Combined df: 17224 rows x 50 cols
+Wrote: /Users/markcampmier/Library/Mobile Documents/com~apple~CloudDocs/aerlift/data/1_munged/upas_intermediate.csv

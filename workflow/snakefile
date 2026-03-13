@@ -1,0 +1,13 @@
+configfile: "config/config.yaml"
+
+from pathlib import Path
+
+include: "rules/munge.smk"
+
+rule all:
+    input:
+        Path(config['munged_dir']) / "anemometer.nc",
+        Path(config['munged_dir']) / "aranet.nc",
+        Path(config['munged_dir']) / "lascar.nc",
+        Path(config['munged_dir']) / "hhb.nc",
+        Path(config['munged_dir']) / "upas.nc"

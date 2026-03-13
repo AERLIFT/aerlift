@@ -1,0 +1,101 @@
+#%% paths
+data_dir:    '/Users/markcampmier/Library/Mobile Documents/com~apple~CloudDocs/aerlift/data'
+raw_dir:     '/Users/markcampmier/Library/Mobile Documents/com~apple~CloudDocs/aerlift/data/0_raw'
+munged_dir:  '/Users/markcampmier/Library/Mobile Documents/com~apple~CloudDocs/aerlift/data/1_munged'
+results_dir: 'results'
+log_dir:     'logs'
+
+#%% campaign
+campaign:
+  name:     'AERLIFT'
+  timezone: 'America/Los_Angeles'
+
+#%% instruments
+instruments:
+  anemometer:
+    file_ext:  '.txt'
+    skiprows:  6
+    usecols:   [0, 1, 3, 4]
+    threshold:
+      flow_indicator: 0.5
+  aranet:
+    file_ext:   '.csv'
+  lascar:
+    file_ext:   '.txt'
+    usecols: [1, 2, 3]
+  hhb:
+    file_ext: '.csv'
+    alphasense:
+      position_1: 'NO2'
+      position_2: 'O3'
+      position_3: null
+      position_4: null
+    cols_keep:
+      - 'DateTimeUTC'
+      - 'HHBserial'
+      - 'SampleName'
+      - 'SEN55_PM1.0'
+      - 'SEN55_PM2.5'
+      - 'SEN55_PM4.0'
+      - 'SEN55_PM10'
+      - 'SEN55_RH'
+      - 'SEN55_Temp'
+      - 'SEN55_RawVOC'
+      - 'SEN55_RawNOx'
+      - 'G.SCD30_CO2'
+      - 'G.Alphasense1_Algorithm1'
+      - 'G.Alphasense2_Algorithm1'
+  upas:
+    file_ext: '.txt'
+    pattern: '*.txt'
+    cols_keep:
+      - 'DateTimeUTC'
+      - 'UPASserial'
+      - 'SampleName'
+      - 'CartridgeID'
+      - 'SampleTime'
+      - 'BatteryCharge'
+      - 'AtmoT'
+      - 'AtmoP'
+      - 'AtmoRH'
+      - 'AtmoDensity'
+      - 'AtmoAlt'
+      - 'AccelX'
+      - 'AccelY'
+      - 'AccelZ'
+      - 'StepCount'
+      - 'LUX'
+      - 'UVindex'
+      - 'HighVisRaw'
+      - 'LowVisRaw'
+      - 'IRRaw'
+      - 'UVRaw'
+      - 'PMMeasCnt'
+      - 'PM1MC'
+      - 'PM1MCVar'
+      - 'PM2_5MC'
+      - 'PM2_5MCVar'
+      - 'PM4MC'
+      - 'PM4MCVar'
+      - 'PM10MC'
+      - 'PM10MCVar'
+      - 'PM0_5NC'
+      - 'PM0_5NCVar'
+      - 'PM1NC'
+      - 'PM1NCVar'
+      - 'PM2_5NC'
+      - 'PM2_5NCVar'
+      - 'PM4NC'
+      - 'PM4NCVar'
+      - 'PM10NC'
+      - 'PM10NCVar'
+      - 'PMtypicalParticleSize'
+      - 'PMtypicalParticleSizeVar'
+      - 'PM2_5SampledMassOffset'
+      - 'CO2'
+      - 'SCDT'
+      - 'SCDRH'
+      - 'VOCRaw'
+      - 'NOXRaw'
+      - 'LogFilename'
+      - 'StartDateTimeUTC'
