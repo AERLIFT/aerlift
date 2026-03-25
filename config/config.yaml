@@ -9,6 +9,8 @@ log_dir:     'logs'
 campaign:
   name:     'AERLIFT'
   timezone: 'America/Los_Angeles'
+  start: '2022-09-01'
+  end: '2023-03-31'
 
 #%% instruments
 instruments:
@@ -99,3 +101,11 @@ instruments:
       - 'NOXRaw'
       - 'LogFilename'
       - 'StartDateTimeUTC'
+
+#%% trim criteria
+exclude:
+  anemometer: []
+  aranet:     ['16A28']
+  lascar:     []
+  hhb:        []
+  upas:       []

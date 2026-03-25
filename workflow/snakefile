@@ -3,11 +3,19 @@ configfile: "config/config.yaml"
 from pathlib import Path
 
 include: "rules/munge.smk"
+include: "rules/trim.smk"
 
 rule all:
     input:
-        Path(config['munged_dir']) / "anemometer.nc",
-        Path(config['munged_dir']) / "aranet.nc",
-        Path(config['munged_dir']) / "lascar.nc",
-        Path(config['munged_dir']) / "hhb.nc",
-        Path(config['munged_dir']) / "upas.nc"
+
+        Path(config['munged_dir'])  / "anemometer.nc",
+        Path(config['munged_dir'])  / "aranet.nc",
+        Path(config['munged_dir'])  / "lascar.nc",
+        Path(config['munged_dir'])  / "hhb.nc",
+        Path(config['munged_dir'])  / "upas.nc",
+
+        Path(config['trimmed_dir']) / "anemometer.nc",
+        Path(config['trimmed_dir']) / "aranet.nc",
+        Path(config['trimmed_dir']) / "lascar.nc",
+        Path(config['trimmed_dir']) / "hhb.nc",
+        Path(config['trimmed_dir']) / "upas.nc"
