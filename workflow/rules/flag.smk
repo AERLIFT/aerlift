@@ -13,6 +13,8 @@ rule flag_anemometer:
         instrument="anemometer",
         flag_bits=config["flag"]["anemometer"]["bits"],
         thresholds=config["flag"]["anemometer"]["thresholds"],
+    conda:
+        "../envs/python.yaml"
     script:
         "../scripts/flag/anemometer.py"
 
@@ -29,6 +31,8 @@ rule flag_aranet:
         instrument="aranet",
         flag_bits=config["flag"]["aranet"]["bits"],
         thresholds=config["flag"]["aranet"]["thresholds"],
+    conda:
+        "../envs/python.yaml"
     script:
         "../scripts/flag/aranet.py"
 
@@ -45,6 +49,8 @@ rule flag_lascar:
         instrument="lascar",
         flag_bits=config["flag"]["lascar"]["bits"],
         thresholds=config["flag"]["lascar"]["thresholds"],
+    conda:
+        "../envs/python.yaml"
     script:
         "../scripts/flag/lascar.py"
 
@@ -62,6 +68,8 @@ rule flag_hhb:
         flag_bits=config["flag"]["hhb"]["bits"],
         thresholds=config["flag"]["hhb"]["thresholds"],
         alphasense=config["instruments"]["hhb"]["alphasense"],
+    conda:
+        "../envs/python.yaml"
     script:
         "../scripts/flag/hhb.py"
 
@@ -78,5 +86,7 @@ rule flag_upas:
         instrument="upas",
         flag_bits=config["flag"]["upas"]["bits"],
         thresholds=config["flag"]["upas"]["thresholds"],
+    conda:
+        "../envs/python.yaml"
     script:
         "../scripts/flag/upas.py"

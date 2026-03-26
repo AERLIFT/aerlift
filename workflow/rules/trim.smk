@@ -10,6 +10,8 @@ rule trim_anemometer:
         start=config["campaign"]["start"],
         end=config["campaign"]["end"],
         exclude=config["exclude"]["anemometer"],
+    conda:
+        "../envs/python.yaml"
     script:
         "../scripts/trim.py"
 
@@ -26,6 +28,8 @@ rule trim_aranet:
         start=config["campaign"]["start"],
         end=config["campaign"]["end"],
         exclude=config["exclude"]["aranet"],
+    conda:
+        "../envs/python.yaml"
     script:
         "../scripts/trim.py"
 
@@ -42,6 +46,8 @@ rule trim_lascar:
         start=config["campaign"]["start"],
         end=config["campaign"]["end"],
         exclude=config["exclude"]["lascar"],
+    conda:
+        "../envs/python.yaml"
     script:
         "../scripts/trim.py"
 
@@ -58,6 +64,8 @@ rule trim_hhb:
         start=config["campaign"]["start"],
         end=config["campaign"]["end"],
         exclude=config["exclude"]["hhb"],
+    conda:
+        "../envs/python.yaml"
     script:
         "../scripts/trim.py"
 
@@ -74,5 +82,7 @@ rule trim_upas:
         start=config["campaign"]["start"],
         end=config["campaign"]["end"],
         exclude=config["exclude"]["upas"],
+    conda:
+        "../envs/python.yaml"
     script:
         "../scripts/trim.py"

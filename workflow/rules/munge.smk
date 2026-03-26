@@ -14,9 +14,10 @@ rule munge_anemometer:
         usecols=config["instruments"]["anemometer"]["usecols"],
         threshold=config["instruments"]["anemometer"]["threshold"]["flow_indicator"],
         timezone=config["campaign"]["timezone"],
+    conda:
+        "../envs/python.yaml"
     script:
         "../scripts/munge/anemometer.py"
-
 
 rule munge_aranet:
     input:
@@ -31,6 +32,8 @@ rule munge_aranet:
     params:
         raw_dir=config["raw_dir"],
         timezone=config["campaign"]["timezone"],
+    conda:
+        "../envs/python.yaml"
     script:
         "../scripts/munge/aranet.py"
 
@@ -52,6 +55,8 @@ rule munge_lascar:
         timezone=config["campaign"]["timezone"],
         usecols=config["instruments"]["lascar"]["usecols"],
         file_ext=config["instruments"]["lascar"]["file_ext"],
+    conda:
+        "../envs/python.yaml"
     script:
         "../scripts/munge/lascar.py"
 
@@ -67,6 +72,8 @@ rule munge_hhb_r:
         raw_dir=config["raw_dir"],
         timezone=config["campaign"]["timezone"],
         cols_keep=config["instruments"]["hhb"]["cols_keep"],
+    conda:
+        "../envs/r.yaml"
     script:
         "../scripts/munge/hhb.R"
 
@@ -82,6 +89,8 @@ rule munge_hhb:
     params:
         timezone=config["campaign"]["timezone"],
         alphasense=config["instruments"]["hhb"]["alphasense"],
+    conda:
+        "../envs/python.yaml"
     script:
         "../scripts/munge/hhb.py"
 
@@ -97,6 +106,8 @@ rule munge_upas_r:
         raw_dir=config["raw_dir"],
         timezone=config["campaign"]["timezone"],
         cols_keep=config["instruments"]["upas"]["cols_keep"],
+    conda:
+        "../envs/r.yaml"
     script:
         "../scripts/munge/upas.R"
 
@@ -111,5 +122,7 @@ rule munge_upas:
         "logs/munge/upas_nc.log",
     params:
         timezone=config["campaign"]["timezone"],
+    conda:
+        "../envs/python.yaml"
     script:
         "../scripts/munge/upas.py"

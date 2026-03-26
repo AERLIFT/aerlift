@@ -1,0 +1,11 @@
+name: aerlift-python
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - pandas
+  - numpy
+  - xarray
+  - netcdf4
+  - pyyaml
+  - snakemake
