@@ -1,21 +1,23 @@
 from pathlib import Path
 from datetime import datetime, timezone
 import logging
+import numpy as np
 import xarray as xr
 
+# ── dev shim ──────────────────────────────────────────────────────────────────
 try:
     snakemake
 except NameError:
     class snakemake:
         class params:
-            start   = '2022-09-01'
-            end     = '2023-03-31'
-            exclude = ['16A28']
-            instrument = 'aranet'
+            start      = '2022-09-01'
+            end        = '2023-03-31'
+            exclude    = []
+            instrument = 'hhb'
         class input:
-            nc = '/Users/markcampmier/Library/Mobile Documents/com~apple~CloudDocs/aerlift/data/1_munged/aranet.nc'
+            nc = '/Users/markcampmier/Library/Mobile Documents/com~apple~CloudDocs/aerlift/data/1_munged/hhb.nc'
         class output:
-            nc = '/Users/markcampmier/Library/Mobile Documents/com~apple~CloudDocs/aerlift/data/2_trimmed/aranet.nc'
+            nc = '/Users/markcampmier/Library/Mobile Documents/com~apple~CloudDocs/aerlift/data/2_trimmed/hhb.nc'
         log = ['/dev/null']
 
 # ── logging ───────────────────────────────────────────────────────────────────
@@ -27,6 +29,26 @@ logging.basicConfig(
 log = logging.getLogger(__name__)
 
 # ── functions ─────────────────────────────────────────────────────────────────
+def get_encoding(ds, skip_extra=None):
+    skip = set(ds.coords) | {'SampleName', 'LogFilename',
+                              'CartridgeID', 'StartDateTimeUTC', 'UserTZ'}
+    if skip_extra:
+        skip |= set(skip_extra)
+
+    encoding = {v: {'zlib': True, 'complevel': 4}
+                for v in ds.data_vars
+                if v not in skip
+                and np.issubdtype(ds[v].dtype, np.number)}
+
+    if 'datetime' in ds.coords:
+        encoding['datetime'] = {
+            'dtype':    'float64',
+            'units':    'seconds since 1970-01-01',
+            'calendar': 'proleptic_gregorian'
+        }
+
+    return encoding
+
 def trim(ds, start, end, exclude):
     n_before = ds.sizes['datetime']
 
@@ -37,8 +59,8 @@ def trim(ds, start, end, exclude):
 
     # sensor exclusion
     if exclude:
-        sensors_before = list(ds.sensor.values)
-        sensors_keep   = [s for s in sensors_before if s not in exclude]
+        sensors_before  = list(ds.sensor.values)
+        sensors_keep    = [s for s in sensors_before if s not in exclude]
         sensors_dropped = [s for s in sensors_before if s in exclude]
         ds = ds.sel(sensor=sensors_keep)
         log.info(f"Excluded sensors: {sensors_dropped}")
@@ -53,14 +75,14 @@ def update_metadata(ds, params):
     ds.attrs['trim_start']    = params.start
     ds.attrs['trim_end']      = params.end
     ds.attrs['trim_excluded'] = str(params.exclude)
-    ds.attrs['trimmed']      = datetime.now(timezone.utc).isoformat()
+    ds.attrs['trimmed']       = datetime.now(timezone.utc).isoformat()
     return ds
 
 # ── main ──────────────────────────────────────────────────────────────────────
 log.info(f"Starting trim for {snakemake.params.instrument}")
 
 ds = xr.open_dataset(snakemake.input.nc)
-log.info(f"Loaded {snakemake.input.nc}")
+log.info(f"Loaded {snakemake.input.nc}: {dict(ds.sizes)}")
 
 ds = trim(ds,
           start   = snakemake.params.start,
@@ -73,11 +95,5 @@ ds = update_metadata(ds, snakemake.params)
 out_path = Path(snakemake.output.nc)
 out_path.parent.mkdir(parents=True, exist_ok=True)
 
-import numpy as np
-num_vars = [v for v in ds.data_vars
-            if ds[v].dtype in [np.float32, np.float64, np.int32, np.int64]]
-ds.to_netcdf(
-    out_path,
-    encoding={v: {'zlib': True, 'complevel': 4} for v in num_vars}
-)
+ds.to_netcdf(out_path, encoding=get_encoding(ds))
 log.info(f"Wrote {out_path}")

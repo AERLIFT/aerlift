@@ -7,11 +7,11 @@ rule trim_anemometer:
         instrument = 'anemometer',
         start      = config['campaign']['start'],
         end        = config['campaign']['end'],
-        exclude    = config['campaign']['exclude']['anemometer']
+        exclude    = config['exclude']['anemometer']
     log:
         "logs/trim/anemometer.log"
     script:
-        "../scripts/trim/trim.py"
+        "../scripts/trim.py"
 
 rule trim_aranet:
     input:
@@ -22,11 +22,11 @@ rule trim_aranet:
         instrument = 'aranet',
         start      = config['campaign']['start'],
         end        = config['campaign']['end'],
-        exclude    = config['campaign']['exclude']['aranet']
+        exclude    = config['exclude']['aranet']
     log:
         "logs/trim/aranet.log"
     script:
-        "../scripts/trim/trim.py"
+        "../scripts/trim.py"
 
 rule trim_lascar:
     input:
@@ -37,11 +37,11 @@ rule trim_lascar:
         instrument = 'lascar',
         start      = config['campaign']['start'],
         end        = config['campaign']['end'],
-        exclude    = config['campaign']['exclude']['lascar']
+        exclude    = config['exclude']['lascar']
     log:
         "logs/trim/lascar.log"
     script:
-        "../scripts/trim/trim.py"
+        "../scripts/trim.py"
 
 rule trim_hhb:
     input:
@@ -52,11 +52,11 @@ rule trim_hhb:
         instrument = 'hhb',
         start      = config['campaign']['start'],
         end        = config['campaign']['end'],
-        exclude    = config['campaign']['exclude']['hhb']
+        exclude    = config['exclude']['hhb']
     log:
         "logs/trim/hhb.log"
     script:
-        "../scripts/trim/trim.py"
+        "../scripts/trim.py"
 
 rule trim_upas:
     input:
@@ -67,8 +67,8 @@ rule trim_upas:
         instrument = 'upas',
         start      = config['campaign']['start'],
         end        = config['campaign']['end'],
-        exclude    = config['campaign']['exclude']['upas']
+        exclude    = config['exclude']['upas']
     log:
         "logs/trim/upas.log"
     script:
-        "../scripts/trim/trim.py"
+        "../scripts/trim.py"
