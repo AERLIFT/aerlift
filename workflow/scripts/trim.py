@@ -4,7 +4,6 @@ import logging
 import numpy as np
 import xarray as xr
 
-# ── dev shim ──────────────────────────────────────────────────────────────────
 try:
     snakemake
 except NameError:

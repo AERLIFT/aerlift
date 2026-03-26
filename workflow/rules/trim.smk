@@ -1,74 +1,78 @@
 rule trim_anemometer:
     input:
-        nc = Path(config['munged_dir']) / "anemometer.nc"
+        nc=Path(config["munged_dir"]) / "anemometer.nc",
     output:
-        nc = Path(config['trimmed_dir']) / "anemometer.nc"
-    params:
-        instrument = 'anemometer',
-        start      = config['campaign']['start'],
-        end        = config['campaign']['end'],
-        exclude    = config['exclude']['anemometer']
+        nc=Path(config["trimmed_dir"]) / "anemometer.nc",
     log:
-        "logs/trim/anemometer.log"
+        "logs/trim/anemometer.log",
+    params:
+        instrument="anemometer",
+        start=config["campaign"]["start"],
+        end=config["campaign"]["end"],
+        exclude=config["exclude"]["anemometer"],
     script:
         "../scripts/trim.py"
+
 
 rule trim_aranet:
     input:
-        nc = Path(config['munged_dir']) / "aranet.nc"
+        nc=Path(config["munged_dir"]) / "aranet.nc",
     output:
-        nc = Path(config['trimmed_dir']) / "aranet.nc"
-    params:
-        instrument = 'aranet',
-        start      = config['campaign']['start'],
-        end        = config['campaign']['end'],
-        exclude    = config['exclude']['aranet']
+        nc=Path(config["trimmed_dir"]) / "aranet.nc",
     log:
-        "logs/trim/aranet.log"
+        "logs/trim/aranet.log",
+    params:
+        instrument="aranet",
+        start=config["campaign"]["start"],
+        end=config["campaign"]["end"],
+        exclude=config["exclude"]["aranet"],
     script:
         "../scripts/trim.py"
+
 
 rule trim_lascar:
     input:
-        nc = Path(config['munged_dir']) / "lascar.nc"
+        nc=Path(config["munged_dir"]) / "lascar.nc",
     output:
-        nc = Path(config['trimmed_dir']) / "lascar.nc"
-    params:
-        instrument = 'lascar',
-        start      = config['campaign']['start'],
-        end        = config['campaign']['end'],
-        exclude    = config['exclude']['lascar']
+        nc=Path(config["trimmed_dir"]) / "lascar.nc",
     log:
-        "logs/trim/lascar.log"
+        "logs/trim/lascar.log",
+    params:
+        instrument="lascar",
+        start=config["campaign"]["start"],
+        end=config["campaign"]["end"],
+        exclude=config["exclude"]["lascar"],
     script:
         "../scripts/trim.py"
+
 
 rule trim_hhb:
     input:
-        nc = Path(config['munged_dir']) / "hhb.nc"
+        nc=Path(config["munged_dir"]) / "hhb.nc",
     output:
-        nc = Path(config['trimmed_dir']) / "hhb.nc"
-    params:
-        instrument = 'hhb',
-        start      = config['campaign']['start'],
-        end        = config['campaign']['end'],
-        exclude    = config['exclude']['hhb']
+        nc=Path(config["trimmed_dir"]) / "hhb.nc",
     log:
-        "logs/trim/hhb.log"
+        "logs/trim/hhb.log",
+    params:
+        instrument="hhb",
+        start=config["campaign"]["start"],
+        end=config["campaign"]["end"],
+        exclude=config["exclude"]["hhb"],
     script:
         "../scripts/trim.py"
 
+
 rule trim_upas:
     input:
-        nc = Path(config['munged_dir']) / "upas.nc"
+        nc=Path(config["munged_dir"]) / "upas.nc",
     output:
-        nc = Path(config['trimmed_dir']) / "upas.nc"
-    params:
-        instrument = 'upas',
-        start      = config['campaign']['start'],
-        end        = config['campaign']['end'],
-        exclude    = config['exclude']['upas']
+        nc=Path(config["trimmed_dir"]) / "upas.nc",
     log:
-        "logs/trim/upas.log"
+        "logs/trim/upas.log",
+    params:
+        instrument="upas",
+        start=config["campaign"]["start"],
+        end=config["campaign"]["end"],
+        exclude=config["exclude"]["upas"],
     script:
         "../scripts/trim.py"
