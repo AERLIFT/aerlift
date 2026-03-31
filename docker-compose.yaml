@@ -1,11 +1,11 @@
 services:
-  aerlift-qa:
+  aerlift:
     build: .
     image: aerlift-app:latest
     container_name: aerlift
     volumes:
       - .:/aerlift
-      - "/Users/markcampmier/Library/Mobile Documents/com~apple~CloudDocs/aerlift/data:/aerlift/data"
+      - "${DATA_DIR}:/aerlift/data"
 
     tty: true
     stdin_open: true
