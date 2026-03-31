@@ -4,7 +4,6 @@ services:
     image: aerlift-app:latest
     container_name: aerlift
     volumes:
-      # 1. Map the CODEBASE (current directory) to /aerlift
       - .:/aerlift
       - "/Users/markcampmier/Library/Mobile Documents/com~apple~CloudDocs/aerlift/data:/aerlift/data"
 
