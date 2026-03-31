@@ -15,7 +15,7 @@ tryCatch({
   
   message(paste("Starting UPAS munging at", Sys.time()))
   message(paste("raw_dir:", raw_dir))
-  
+
   files <- list.files(
     path       = file.path(raw_dir, "upas"),
     pattern    = "^PS.*.txt$",

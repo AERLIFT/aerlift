@@ -1,9 +1,9 @@
 #%% paths
-data_dir:    '/Users/markcampmier/Library/Mobile Documents/com~apple~CloudDocs/aerlift/data'
-raw_dir:     '/Users/markcampmier/Library/Mobile Documents/com~apple~CloudDocs/aerlift/data/0_raw'
-munged_dir:  '/Users/markcampmier/Library/Mobile Documents/com~apple~CloudDocs/aerlift/data/1_munged'
-trimmed_dir: '/Users/markcampmier/Library/Mobile Documents/com~apple~CloudDocs/aerlift/data/2_trimmed'
-flagged_dir: '/Users/markcampmier/Library/Mobile Documents/com~apple~CloudDocs/aerlift/data/3_flagged'
+data_dir:    '/aerlift/data'
+raw_dir:     '/aerlift/data/0_raw'
+munged_dir:  '/aerlift/data/1_munged'
+trimmed_dir: '/aerlift/data/2_trimmed'
+flagged_dir: 'aerlift/data/3_flagged'
 results_dir: 'results'
 log_dir:     'logs'
 
