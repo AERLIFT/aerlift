@@ -31,7 +31,7 @@ log = logging.getLogger(__name__)
 # ── functions ─────────────────────────────────────────────────────────────────
 def get_files(raw_dir, ext='.txt'):
     path = Path(raw_dir.strip()) / 'anemometer'
-    files = list(path.glob(f'*{ext}'))
+    files = list(path.rglob(f'*{ext}'))
     assert len(files) > 0, f"No {ext} files found in {path}"
     return files
 

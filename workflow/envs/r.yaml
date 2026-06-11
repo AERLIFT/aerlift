@@ -8,3 +8,7 @@ dependencies:
   - r-dplyr
   - r-devtools
   - r-yaml
+  - r-config
+  - r-data.table
+  - r-tidyr
+  - r-lubridate
