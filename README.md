@@ -122,6 +122,49 @@ Per-rule conda environments are defined in `workflow/envs/` and managed automati
  
 ---
  
+## Docker Setup (Recommended)
+
+Docker bundles all Python and R dependencies into a single image — no conda, no manual environment setup. Requires [Docker Desktop](https://www.docker.com/products/docker-desktop/).
+
+**1. Clone the repo**
+
+```bash
+git clone <repo-url>
+cd aerlift
+```
+
+**2. Configure your data path**
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` and set `DATA_DIR` to the folder containing your `0_raw/` directory:
+
+```bash
+DATA_DIR=/path/to/your/data
+```
+
+If you just want to test the build without real data, leave it as `DATA_DIR=./data` and create an empty `data/` folder — the pipeline will build and validate the DAG, then fail gracefully with a missing-input message.
+
+**3. Run**
+
+```bash
+docker compose up
+```
+
+Docker builds the image on first run (10–15 minutes — conda env build). Subsequent runs use the cached image and start in seconds.
+
+**Notes**
+
+- Raw data must be physically present on disk. If your data folder is in iCloud, right-click it in Finder → **Keep Downloaded** before running.
+- Anemometer files may be organized in subdirectories (e.g. `0_raw/anemometer/E102/`) — this is handled automatically.
+- All pipeline outputs are written back to your local `DATA_DIR` via the volume mount.
+- To run a dry-run without executing jobs: `docker compose run --rm aerlift snakemake --dry-run --cores 1`
+- The Docker image is rebuilt only when `Dockerfile` or `workflow/envs/*.yaml` change. Re-running `docker compose up` after a config or data change does not trigger a rebuild — Snakemake will only rerun rules whose inputs changed or outputs are missing.
+
+---
+
 ## Running the Pipeline
  
 ```bash
