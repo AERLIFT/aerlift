@@ -129,7 +129,7 @@ Docker bundles all Python and R dependencies into a single image — no conda, n
 **1. Clone the repo**
 
 ```bash
-git clone [<repo-url>](https://github.com/AERLIFT/aerlift.git)
+git clone https://github.com/AERLIFT/aerlift.git
 cd aerlift
 ```
 
