@@ -3,10 +3,11 @@ services:
     build: .
     image: aerlift-app:latest
     container_name: aerlift
+    env_file:
+      - .env
     volumes:
       - .:/aerlift
-      - "${DATA_DIR}:/aerlift/data"
-
+      - "${DATA_DIR:-./data}:/aerlift/data"
     tty: true
     stdin_open: true
-    command: ["snakemake", "--cores", "1", "--use-conda"]
+    command: ["snakemake", "--cores", "1"]

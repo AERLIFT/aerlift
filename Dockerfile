@@ -18,10 +18,11 @@ RUN conda run -n aerlift-r Rscript -e 'devtools::install_github("accsensors/astr
 
 # 4. Set up working directory
 WORKDIR /aerlift
-
 COPY . .
 
-ENV PATH="/opt/conda/envs/aerlift-python/bin:$PATH"
+# 5. Expose both conda envs; python env takes priority for snakemake
+ENV PATH="/opt/conda/envs/aerlift-python/bin:/opt/conda/envs/aerlift-r/bin:$PATH"
+ENV CONDA_DEFAULT_ENV=aerlift-python
 
-# 7. Run snakemake
-CMD ["snakemake", "--cores", "1", "--use-conda"]
+# 6. Run snakemake (no --use-conda: envs are already built into the image)
+CMD ["snakemake", "--cores", "1"]
