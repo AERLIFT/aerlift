@@ -27,6 +27,8 @@ instruments:
   lascar:
     file_ext:   '.txt'
     usecols: [1, 2, 3]
+  atmotube:
+    file_ext: '.csv'
   hhb:
     file_ext: '.csv'
     alphasense:
@@ -149,6 +151,17 @@ flag:
     thresholds:
       co_min:   0.0
       co_max:   200.0
+
+  atmotube:
+    bits:
+      4: 'co_negative'
+      8: 'co_high'
+    thresholds:
+      co_min: 0.0
+      co_max: 200.0
+      voc_raw_min: 0.0
+      pm_min: 0.0
+
 
   hhb:
     bits:
