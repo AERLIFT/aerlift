@@ -60,6 +60,28 @@ rule munge_lascar:
     script:
         "../scripts/munge/lascar.py"
 
+rule munge_atmotube:
+    input:
+        files=lambda wc: list(
+            (Path(config["raw_dir"].strip()) / "atmotube").glob(
+                f"*{config['instruments']['atmotube']['file_ext']}"
+            )
+        ),
+    output:
+        nc=Path(config["munged_dir"]) / "atmotube.nc",
+        csv=Path(config["munged_dir"]) / "atmotube_summary.csv",
+    log:
+        "logs/munge/atmotube.log",
+    params:
+        raw_dir=config["raw_dir"],
+        timezone=config["campaign"]["timezone"],
+        usecols=config["instruments"]["atmotube"]["usecols"],
+        file_ext=config["instruments"]["atmotube"]["file_ext"],
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/munge/atmotube.py"
+
 
 rule munge_hhb_r:
     input:

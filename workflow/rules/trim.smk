@@ -52,6 +52,24 @@ rule trim_lascar:
         "../scripts/trim.py"
 
 
+rule trim_atmotube:
+    input:
+        nc=Path(config["munged_dir"]) / "atmotube.nc",
+    output:
+        nc=Path(config["trimmed_dir"]) / "atmotube.nc",
+    log:
+        "logs/trim/atmotube.log",
+    params:
+        instrument="atmotube",
+        start=config["campaign"]["start"],
+        end=config["campaign"]["end"],
+        exclude=config["exclude"]["atmotube"],
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/trim.py"
+
+
 rule trim_hhb:
     input:
         nc=Path(config["munged_dir"]) / "hhb.nc",

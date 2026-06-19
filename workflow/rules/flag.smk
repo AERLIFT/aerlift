@@ -55,6 +55,24 @@ rule flag_lascar:
         "../scripts/flag/lascar.py"
 
 
+rule flag_atmotube:
+    input:
+        nc=Path(config["trimmed_dir"]) / "atmotube.nc",
+    output:
+        nc=Path(config["flagged_dir"]) / "atmotube.nc",
+        csv=Path(config["flagged_dir"]) / "atmotube_flags.csv",
+    log:
+        "logs/flag/atmotube.log",
+    params:
+        instrument="atmotube",
+        flag_bits=config["flag"]["atmotube"]["bits"],
+        thresholds=config["flag"]["atmotube"]["thresholds"],
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/flag/atmotube.py"
+
+
 rule flag_hhb:
     input:
         nc=Path(config["trimmed_dir"]) / "hhb.nc",
