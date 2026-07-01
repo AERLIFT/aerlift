@@ -29,6 +29,8 @@ instruments:
     usecols: [1, 2, 3]
   atmotube:
     file_ext: '.csv'
+  aulifants:
+    file_ext: '.CSV'
   hhb:
     file_ext: '.csv'
     alphasense:
@@ -161,6 +163,14 @@ flag:
       co_max: 200.0
       voc_raw_min: 0.0
       pm_min: 0.0
+
+  aulifants:
+    bits:
+      4: 'voltage_negative'
+      8: 'voltage_high'
+    thresholds:
+      voltage_min: 0.0
+      voltage_max: 240.0
 
 
   hhb:

@@ -108,7 +108,7 @@ def add_metadata(ds, params):
     return ds
 
 # ── main ──────────────────────────────────────────────────────────────────────
-log.info("Starting Aranet4 munging")
+log.info("Starting atmotube munging")
 
 ds_atmotube = process_atmotube(snakemake.params)
 log.info(f"Processed {len(get_files(snakemake.params.raw_dir))} files")
