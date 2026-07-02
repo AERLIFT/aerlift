@@ -27,13 +27,21 @@ log = logging.getLogger(__name__)
 # ── functions ─────────────────────────────────────────────────────────────────
 def get_files(raw_dir, ext='.CSV'):
     path = Path(raw_dir.strip()) / 'aulifants'
-    files = list(path.rglob(f'*{ext}'))
-    assert len(files) > 0, f"No {ext} files found in {path}"
+    files = [f for f in path.rglob(f'*{ext}')
+             if f.name.upper().endswith('-D.CSV')]
+    assert len(files) > 0, f"No *-D{ext} files found in {path}"
     return files, path
 
 def parse_sensor_id(file):
     device, date = file.parent.stem.split('-Aulifant4-')
     return device, date
+
+def _strip_units(series):
+    """Extract leading numeric value from strings like '112.3Volt', '  0.00Amp', '$0.00 '."""
+    return pd.to_numeric(
+        series.astype(str).str.replace(r'[^\d.]', '', regex=True),
+        errors='coerce'
+    )
 
 def read_aulifants_file(file, timezone):
     df = pd.read_csv(file,
@@ -41,11 +49,14 @@ def read_aulifants_file(file, timezone):
                      usecols=[0, 1, 2, 3, 4, 5, 6])
     df.columns = ['time', 'voltage', 'current', 'power', 'power_factor',
                   'cummulative_energy', 'cost']
+    for col in ['voltage', 'current', 'power', 'cummulative_energy', 'cost']:
+        df[col] = _strip_units(df[col])
+    df['power_factor'] = pd.to_numeric(df['power_factor'], errors='coerce')
     device, date = parse_sensor_id(file)
     df['sensor'] = device
     df['datetime'] = pd.to_datetime(date +' '+ df['time'], format='%Y-%m-%d %H:%M:%S')
     df.index = (df['datetime']
-                  .dt.tz_localize(timezone)
+                  .dt.tz_localize(timezone, ambiguous='NaT')
                   .dt.tz_convert('UTC')
                   .dt.tz_localize(None))
     df.index.name = 'datetime'
@@ -53,7 +64,7 @@ def read_aulifants_file(file, timezone):
     return df
 
 def process_aulifants(params):
-    files = get_files(params.raw_dir)
+    files, _ = get_files(params.raw_dir)
     lst_df = [
         read_aulifants_file(file, timezone=params.timezone)
         for file in files
@@ -85,6 +96,8 @@ def add_metadata(ds, params):
         'institution':    'UC Berkeley School of Public Health',
         'creator_name':   'Mark Campmier, PhD',
     }
+    if getattr(params, 'synthetic', None) == 'true':
+        ds.attrs['SYNTHETIC'] = 'true'
     ds['voltage'].attrs         = {'long_name': 'Voltage',
                                'units': 'V', 'instrument': 'Aulifants'}
     ds['current'].attrs = {'long_name': 'Current',
@@ -103,14 +116,15 @@ def add_metadata(ds, params):
 log.info("Starting Aulifants munging")
 
 ds_aulifants = process_aulifants(snakemake.params)
-log.info(f"Processed {len(get_files(snakemake.params.raw_dir))} files")
+_auli_files, _ = get_files(snakemake.params.raw_dir)
+log.info(f"Processed {len(_auli_files)} files")
 
 ds_aulifants = add_metadata(ds_aulifants, snakemake.params)
 
 # summary csv
-files = get_files(snakemake.params.raw_dir)
+_sum_files, _ = get_files(snakemake.params.raw_dir)
 summary = pd.DataFrame({
-    'n_files':        [len(files)],
+    'n_files':        [len(_sum_files)],
     'n_records':      [ds_aulifants.sizes['datetime']],
     'voltage_mean':   [float(ds_aulifants['voltage'].mean())],
     'voltage_max':    [float(ds_aulifants['voltage'].max())],

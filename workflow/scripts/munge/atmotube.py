@@ -40,8 +40,8 @@ def read_atmotube_file(file, timezone):
                   'temperature', 'rh', 'pressure', 'tvoc_index', 'tvoc',
                   'nox_index', 'co2', 'latitude', 'longitude', 'altitude',
                   'position_error', 'battery', 'charging', 'motion', 'phone_gps']
-    df.index = (pd.to_datetime(df['datetime'], format='%d/%m/%Y %H:%M')
-                  .dt.tz_localize(timezone)
+    df.index = (pd.to_datetime(df['datetime'], format='mixed')
+                  .dt.tz_localize(timezone, ambiguous='NaT')
                   .dt.tz_convert('UTC')
                   .dt.tz_localize(None))
     df.index.name = 'datetime'

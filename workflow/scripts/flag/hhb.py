@@ -116,6 +116,8 @@ def flag_hhb(ds, thresholds, flag_bits, alphasense):
 
     # ── electrochemical ───────────────────────────────────────────────────────
     for var in [g1, g2]:
+        if var not in ds:
+            continue
         f = init_flag(ds, var)
         f = apply_flag(f, warmup_mask, 8)   # electrochemical_warmup
         ds[f'flag_{var}'] = f
@@ -131,8 +133,10 @@ def flag_hhb(ds, thresholds, flag_bits, alphasense):
         'flag_sen_temperature', 'flag_sen_rh',
         'flag_sen_voc_raw', 'flag_sen_nox_raw',
         'flag_scd30_co2',
-        f'flag_{g1}', f'flag_{g2}',
     ]
+    for var in [g1, g2]:
+        if f'flag_{var}' in ds:
+            flag_vars.append(f'flag_{var}')
     ds['flag_global'] = compute_flag_global(ds, flag_vars)
     ds['flag_global'].attrs = {
         'long_name': 'global quality flag — bitwise OR of all flag variables',

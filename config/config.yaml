@@ -115,6 +115,8 @@ exclude:
   lascar:     []
   hhb:        []
   upas:       []
+  atmotube:   []
+  aulifants:  []
 
 #%% flag criteria
 flag:

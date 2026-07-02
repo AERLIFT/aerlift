@@ -71,6 +71,8 @@ def add_metadata(ds, params):
         'institution':    'UC Berkeley School of Public Health',
         'creator_name':   'Mark Campmier, PhD',
     }
+    if getattr(params, 'synthetic', None) == 'true':
+        ds.attrs['SYNTHETIC'] = 'true'
     ds['sen_pm1_raw'].attrs          = {'long_name': 'Sensirion PM1.0 mass concentration',  'units': 'ug/m3'}
     ds['sen_pm25_raw'].attrs          = {'long_name': 'Sensirion PM2.5 mass concentration',  'units': 'ug/m3'}
     ds['sen_pm4_raw'].attrs          = {'long_name': 'Sensirion PM4.0 mass concentration',  'units': 'ug/m3'}
@@ -80,18 +82,22 @@ def add_metadata(ds, params):
     ds['sen_voc_raw'].attrs         = {'long_name': 'raw VOC index signal',       'units': '1'}
     ds['sen_nox_raw'].attrs         = {'long_name': 'raw NOx index signal',       'units': '1'}
     ds['scd30_co2'].attrs          = {'long_name': 'CO2 mixing ratio',           'units': 'ppm'}
-    ds[f"{params.alphasense['position_1']}_algorithm1"].attrs = {
-        'long_name': f"{params.alphasense['position_1']} concentration Algorithm 1",
-        'units': 'ppb',
-        'instrument': 'Alphasense B-series',
-        'position': '1'
-    }
-    ds[f"{params.alphasense['position_2']}_algorithm1"].attrs = {
-        'long_name': f"{params.alphasense['position_2']} concentration Algorithm 1",
-        'units': 'ppb',
-        'instrument': 'Alphasense B-series',
-        'position': '2'
-    }
+    pos1 = params.alphasense.get('position_1')
+    pos2 = params.alphasense.get('position_2')
+    if pos1 and f"{pos1}_algorithm1" in ds:
+        ds[f"{pos1}_algorithm1"].attrs = {
+            'long_name': f"{pos1} concentration Algorithm 1",
+            'units': 'ppb',
+            'instrument': 'Alphasense B-series',
+            'position': '1'
+        }
+    if pos2 and f"{pos2}_algorithm1" in ds:
+        ds[f"{pos2}_algorithm1"].attrs = {
+            'long_name': f"{pos2} concentration Algorithm 1",
+            'units': 'ppb',
+            'instrument': 'Alphasense B-series',
+            'position': '2'
+        }
     return ds
 
 # ── main ──────────────────────────────────────────────────────────────────────

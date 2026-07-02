@@ -108,3 +108,21 @@ rule flag_upas:
         "../envs/python.yaml"
     script:
         "../scripts/flag/upas.py"
+
+
+rule flag_aulifants:
+    input:
+        nc=Path(config["trimmed_dir"]) / "aulifants.nc",
+    output:
+        nc=Path(config["flagged_dir"]) / "aulifants.nc",
+        csv=Path(config["flagged_dir"]) / "aulifants_flags.csv",
+    log:
+        "logs/flag/aulifants.log",
+    params:
+        instrument="aulifants",
+        flag_bits=config["flag"]["aulifants"]["bits"],
+        thresholds=config["flag"]["aulifants"]["thresholds"],
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/flag/aulifants.py"

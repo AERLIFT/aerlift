@@ -14,6 +14,7 @@ rule munge_anemometer:
         usecols=config["instruments"]["anemometer"]["usecols"],
         threshold=config["instruments"]["anemometer"]["threshold"]["flow_indicator"],
         timezone=config["campaign"]["timezone"],
+        synthetic=config.get("synthetic", "false"),
     conda:
         "../envs/python.yaml"
     script:
@@ -32,6 +33,7 @@ rule munge_aranet:
     params:
         raw_dir=config["raw_dir"],
         timezone=config["campaign"]["timezone"],
+        synthetic=config.get("synthetic", "false"),
     conda:
         "../envs/python.yaml"
     script:
@@ -55,6 +57,7 @@ rule munge_lascar:
         timezone=config["campaign"]["timezone"],
         usecols=config["instruments"]["lascar"]["usecols"],
         file_ext=config["instruments"]["lascar"]["file_ext"],
+        synthetic=config.get("synthetic", "false"),
     conda:
         "../envs/python.yaml"
     script:
@@ -75,12 +78,31 @@ rule munge_atmotube:
     params:
         raw_dir=config["raw_dir"],
         timezone=config["campaign"]["timezone"],
-        usecols=config["instruments"]["atmotube"]["usecols"],
-        file_ext=config["instruments"]["atmotube"]["file_ext"],
+        synthetic=config.get("synthetic", "false"),
     conda:
         "../envs/python.yaml"
     script:
         "../scripts/munge/atmotube.py"
+
+
+rule munge_aulifants:
+    input:
+        files=lambda wc: list(
+            (Path(config["raw_dir"].strip()) / "aulifants").rglob("*-D.CSV")
+        ),
+    output:
+        nc=Path(config["munged_dir"]) / "aulifants.nc",
+        csv=Path(config["munged_dir"]) / "aulifants_summary.csv",
+    log:
+        "logs/munge/aulifants.log",
+    params:
+        raw_dir=config["raw_dir"],
+        timezone=config["campaign"]["timezone"],
+        synthetic=config.get("synthetic", "false"),
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/munge/aulifants.py"
 
 
 rule munge_hhb_r:
@@ -111,6 +133,7 @@ rule munge_hhb:
     params:
         timezone=config["campaign"]["timezone"],
         alphasense=config["instruments"]["hhb"]["alphasense"],
+        synthetic=config.get("synthetic", "false"),
     conda:
         "../envs/python.yaml"
     script:
@@ -144,6 +167,7 @@ rule munge_upas:
         "logs/munge/upas_nc.log",
     params:
         timezone=config["campaign"]["timezone"],
+        synthetic=config.get("synthetic", "false"),
     conda:
         "../envs/python.yaml"
     script:

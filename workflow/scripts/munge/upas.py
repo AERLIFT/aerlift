@@ -84,7 +84,15 @@ def load_upas(input_csv, timezone):
 
     df = df.set_index('datetime')
 
-    return df
+    # deduplicate: keep row with fewest NaNs per (sensor, datetime)
+    n_before = len(df)
+    df2 = df.reset_index()
+    df2['n_nan'] = df2.isnull().sum(axis=1)
+    df2 = (df2.sort_values('n_nan')
+              .drop_duplicates(subset=['sensor', 'datetime'], keep='first')
+              .drop(columns='n_nan'))
+    log.info(f"Dropped {n_before - len(df2)} duplicate rows")
+    return df2.set_index('datetime')
 
 def add_metadata(ds, params):
     ds.attrs = {
@@ -99,6 +107,8 @@ def add_metadata(ds, params):
         'institution':    'UC Berkeley School of Public Health',
         'creator_name':   'Mark Campmier, PhD',
     }
+    if getattr(params, 'synthetic', None) == 'true':
+        ds.attrs['SYNTHETIC'] = 'true'
     # met
     ds['upas_atmo_temperature'].attrs = {'long_name': 'atmospheric temperature',       'units': 'degC'}
     ds['upas_atmo_pressure'].attrs    = {'long_name': 'atmospheric pressure',          'units': 'hPa'}

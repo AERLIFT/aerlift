@@ -104,3 +104,21 @@ rule trim_upas:
         "../envs/python.yaml"
     script:
         "../scripts/trim.py"
+
+
+rule trim_aulifants:
+    input:
+        nc=Path(config["munged_dir"]) / "aulifants.nc",
+    output:
+        nc=Path(config["trimmed_dir"]) / "aulifants.nc",
+    log:
+        "logs/trim/aulifants.log",
+    params:
+        instrument="aulifants",
+        start=config["campaign"]["start"],
+        end=config["campaign"]["end"],
+        exclude=config["exclude"]["aulifants"],
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/trim.py"

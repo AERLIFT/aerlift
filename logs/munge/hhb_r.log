@@ -1,10 +1,108 @@
-Starting HHB munging at 2026-06-11 23:02:01.954497
-raw_dir: /aerlift/data/0_raw
+Starting HHB munging at 2026-07-02 22:08:09.330672
+raw_dir: /aerlift/data/0_synthetic
 timezone: America/Los_Angeles
-cols_keep: DateTimeUTC, HHBserial, SampleName, SEN55_PM1.0, SEN55_PM2.5, SEN55_PM4.0, SEN55_PM10, SEN55_RH, SEN55_Temp, SEN55_RawVOC, SEN55_RawNOx, G.SCD30_CO2, G.Alphasense1_Algorithm1, G.Alphasense2_Algorithm1
-Found 1 files:
-/aerlift/data/0_raw/hhb/HHB00112_LOG_2025-08-01T23_00UTC.csv
-Reading: /aerlift/data/0_raw/hhb/HHB00112_LOG_2025-08-01T23_00UTC.csv
-Combined df dimensions: 7681 rows x 14 cols
-Columns: DateTimeUTC, HHBserial, SampleName, SEN55_PM1.0, SEN55_PM2.5, SEN55_PM4.0, SEN55_PM10, SEN55_RH, SEN55_Temp, SEN55_RawVOC, SEN55_RawNOx, G.SCD30_CO2, G.Alphasense1_Algorithm1, G.Alphasense2_Algorithm1
-Wrote: /aerlift/data/1_munged/hhb_intermediate.csv
+cols_keep: DateTimeUTC, HHBserial, SampleName, SEN55_PM1.0, SEN55_PM2.5, SEN55_PM4.0, SEN55_PM10, SEN55_RH, SEN55_Temp, SEN55_RawVOC, SEN55_RawNOx, G.SCD30_CO2
+Found 50 files:
+/aerlift/data/0_synthetic/hhb/HHB99001_LOG_2022-09-15T08_00UTC.csv
+/aerlift/data/0_synthetic/hhb/HHB99002_LOG_2022-09-15T08_00UTC.csv
+/aerlift/data/0_synthetic/hhb/HHB99003_LOG_2022-09-15T08_00UTC.csv
+/aerlift/data/0_synthetic/hhb/HHB99004_LOG_2022-09-15T08_00UTC.csv
+/aerlift/data/0_synthetic/hhb/HHB99005_LOG_2022-09-15T08_00UTC.csv
+/aerlift/data/0_synthetic/hhb/HHB99006_LOG_2022-09-15T08_00UTC.csv
+/aerlift/data/0_synthetic/hhb/HHB99007_LOG_2022-09-15T08_00UTC.csv
+/aerlift/data/0_synthetic/hhb/HHB99008_LOG_2022-09-15T08_00UTC.csv
+/aerlift/data/0_synthetic/hhb/HHB99009_LOG_2022-09-15T08_00UTC.csv
+/aerlift/data/0_synthetic/hhb/HHB99010_LOG_2022-09-15T08_00UTC.csv
+/aerlift/data/0_synthetic/hhb/HHB99011_LOG_2022-09-15T08_00UTC.csv
+/aerlift/data/0_synthetic/hhb/HHB99012_LOG_2022-09-15T08_00UTC.csv
+/aerlift/data/0_synthetic/hhb/HHB99013_LOG_2022-09-15T08_00UTC.csv
+/aerlift/data/0_synthetic/hhb/HHB99014_LOG_2022-09-15T08_00UTC.csv
+/aerlift/data/0_synthetic/hhb/HHB99015_LOG_2022-09-15T08_00UTC.csv
+/aerlift/data/0_synthetic/hhb/HHB99016_LOG_2022-09-15T08_00UTC.csv
+/aerlift/data/0_synthetic/hhb/HHB99017_LOG_2022-09-15T08_00UTC.csv
+/aerlift/data/0_synthetic/hhb/HHB99018_LOG_2022-09-15T08_00UTC.csv
+/aerlift/data/0_synthetic/hhb/HHB99019_LOG_2022-09-15T08_00UTC.csv
+/aerlift/data/0_synthetic/hhb/HHB99020_LOG_2022-09-15T08_00UTC.csv
+/aerlift/data/0_synthetic/hhb/HHB99021_LOG_2022-09-15T08_00UTC.csv
+/aerlift/data/0_synthetic/hhb/HHB99022_LOG_2022-09-15T08_00UTC.csv
+/aerlift/data/0_synthetic/hhb/HHB99023_LOG_2022-09-15T08_00UTC.csv
+/aerlift/data/0_synthetic/hhb/HHB99024_LOG_2022-09-15T08_00UTC.csv
+/aerlift/data/0_synthetic/hhb/HHB99025_LOG_2022-09-15T08_00UTC.csv
+/aerlift/data/0_synthetic/hhb/HHB99026_LOG_2022-09-15T08_00UTC.csv
+/aerlift/data/0_synthetic/hhb/HHB99027_LOG_2022-09-15T08_00UTC.csv
+/aerlift/data/0_synthetic/hhb/HHB99028_LOG_2022-09-15T08_00UTC.csv
+/aerlift/data/0_synthetic/hhb/HHB99029_LOG_2022-09-15T08_00UTC.csv
+/aerlift/data/0_synthetic/hhb/HHB99030_LOG_2022-09-15T08_00UTC.csv
+/aerlift/data/0_synthetic/hhb/HHB99031_LOG_2022-09-15T08_00UTC.csv
+/aerlift/data/0_synthetic/hhb/HHB99032_LOG_2022-09-15T08_00UTC.csv
+/aerlift/data/0_synthetic/hhb/HHB99033_LOG_2022-09-15T08_00UTC.csv
+/aerlift/data/0_synthetic/hhb/HHB99034_LOG_2022-09-15T08_00UTC.csv
+/aerlift/data/0_synthetic/hhb/HHB99035_LOG_2022-09-15T08_00UTC.csv
+/aerlift/data/0_synthetic/hhb/HHB99036_LOG_2022-09-15T08_00UTC.csv
+/aerlift/data/0_synthetic/hhb/HHB99037_LOG_2022-09-15T08_00UTC.csv
+/aerlift/data/0_synthetic/hhb/HHB99038_LOG_2022-09-15T08_00UTC.csv
+/aerlift/data/0_synthetic/hhb/HHB99039_LOG_2022-09-15T08_00UTC.csv
+/aerlift/data/0_synthetic/hhb/HHB99040_LOG_2022-09-15T08_00UTC.csv
+/aerlift/data/0_synthetic/hhb/HHB99041_LOG_2022-09-15T08_00UTC.csv
+/aerlift/data/0_synthetic/hhb/HHB99042_LOG_2022-09-15T08_00UTC.csv
+/aerlift/data/0_synthetic/hhb/HHB99043_LOG_2022-09-15T08_00UTC.csv
+/aerlift/data/0_synthetic/hhb/HHB99044_LOG_2022-09-15T08_00UTC.csv
+/aerlift/data/0_synthetic/hhb/HHB99045_LOG_2022-09-15T08_00UTC.csv
+/aerlift/data/0_synthetic/hhb/HHB99046_LOG_2022-09-15T08_00UTC.csv
+/aerlift/data/0_synthetic/hhb/HHB99047_LOG_2022-09-15T08_00UTC.csv
+/aerlift/data/0_synthetic/hhb/HHB99048_LOG_2022-09-15T08_00UTC.csv
+/aerlift/data/0_synthetic/hhb/HHB99049_LOG_2022-09-15T08_00UTC.csv
+/aerlift/data/0_synthetic/hhb/HHB99050_LOG_2022-09-15T08_00UTC.csv
+Reading: /aerlift/data/0_synthetic/hhb/HHB99001_LOG_2022-09-15T08_00UTC.csv
+Reading: /aerlift/data/0_synthetic/hhb/HHB99002_LOG_2022-09-15T08_00UTC.csv
+Reading: /aerlift/data/0_synthetic/hhb/HHB99003_LOG_2022-09-15T08_00UTC.csv
+Reading: /aerlift/data/0_synthetic/hhb/HHB99004_LOG_2022-09-15T08_00UTC.csv
+Reading: /aerlift/data/0_synthetic/hhb/HHB99005_LOG_2022-09-15T08_00UTC.csv
+Reading: /aerlift/data/0_synthetic/hhb/HHB99006_LOG_2022-09-15T08_00UTC.csv
+Reading: /aerlift/data/0_synthetic/hhb/HHB99007_LOG_2022-09-15T08_00UTC.csv
+Reading: /aerlift/data/0_synthetic/hhb/HHB99008_LOG_2022-09-15T08_00UTC.csv
+Reading: /aerlift/data/0_synthetic/hhb/HHB99009_LOG_2022-09-15T08_00UTC.csv
+Reading: /aerlift/data/0_synthetic/hhb/HHB99010_LOG_2022-09-15T08_00UTC.csv
+Reading: /aerlift/data/0_synthetic/hhb/HHB99011_LOG_2022-09-15T08_00UTC.csv
+Reading: /aerlift/data/0_synthetic/hhb/HHB99012_LOG_2022-09-15T08_00UTC.csv
+Reading: /aerlift/data/0_synthetic/hhb/HHB99013_LOG_2022-09-15T08_00UTC.csv
+Reading: /aerlift/data/0_synthetic/hhb/HHB99014_LOG_2022-09-15T08_00UTC.csv
+Reading: /aerlift/data/0_synthetic/hhb/HHB99015_LOG_2022-09-15T08_00UTC.csv
+Reading: /aerlift/data/0_synthetic/hhb/HHB99016_LOG_2022-09-15T08_00UTC.csv
+Reading: /aerlift/data/0_synthetic/hhb/HHB99017_LOG_2022-09-15T08_00UTC.csv
+Reading: /aerlift/data/0_synthetic/hhb/HHB99018_LOG_2022-09-15T08_00UTC.csv
+Reading: /aerlift/data/0_synthetic/hhb/HHB99019_LOG_2022-09-15T08_00UTC.csv
+Reading: /aerlift/data/0_synthetic/hhb/HHB99020_LOG_2022-09-15T08_00UTC.csv
+Reading: /aerlift/data/0_synthetic/hhb/HHB99021_LOG_2022-09-15T08_00UTC.csv
+Reading: /aerlift/data/0_synthetic/hhb/HHB99022_LOG_2022-09-15T08_00UTC.csv
+Reading: /aerlift/data/0_synthetic/hhb/HHB99023_LOG_2022-09-15T08_00UTC.csv
+Reading: /aerlift/data/0_synthetic/hhb/HHB99024_LOG_2022-09-15T08_00UTC.csv
+Reading: /aerlift/data/0_synthetic/hhb/HHB99025_LOG_2022-09-15T08_00UTC.csv
+Reading: /aerlift/data/0_synthetic/hhb/HHB99026_LOG_2022-09-15T08_00UTC.csv
+Reading: /aerlift/data/0_synthetic/hhb/HHB99027_LOG_2022-09-15T08_00UTC.csv
+Reading: /aerlift/data/0_synthetic/hhb/HHB99028_LOG_2022-09-15T08_00UTC.csv
+Reading: /aerlift/data/0_synthetic/hhb/HHB99029_LOG_2022-09-15T08_00UTC.csv
+Reading: /aerlift/data/0_synthetic/hhb/HHB99030_LOG_2022-09-15T08_00UTC.csv
+Reading: /aerlift/data/0_synthetic/hhb/HHB99031_LOG_2022-09-15T08_00UTC.csv
+Reading: /aerlift/data/0_synthetic/hhb/HHB99032_LOG_2022-09-15T08_00UTC.csv
+Reading: /aerlift/data/0_synthetic/hhb/HHB99033_LOG_2022-09-15T08_00UTC.csv
+Reading: /aerlift/data/0_synthetic/hhb/HHB99034_LOG_2022-09-15T08_00UTC.csv
+Reading: /aerlift/data/0_synthetic/hhb/HHB99035_LOG_2022-09-15T08_00UTC.csv
+Reading: /aerlift/data/0_synthetic/hhb/HHB99036_LOG_2022-09-15T08_00UTC.csv
+Reading: /aerlift/data/0_synthetic/hhb/HHB99037_LOG_2022-09-15T08_00UTC.csv
+Reading: /aerlift/data/0_synthetic/hhb/HHB99038_LOG_2022-09-15T08_00UTC.csv
+Reading: /aerlift/data/0_synthetic/hhb/HHB99039_LOG_2022-09-15T08_00UTC.csv
+Reading: /aerlift/data/0_synthetic/hhb/HHB99040_LOG_2022-09-15T08_00UTC.csv
+Reading: /aerlift/data/0_synthetic/hhb/HHB99041_LOG_2022-09-15T08_00UTC.csv
+Reading: /aerlift/data/0_synthetic/hhb/HHB99042_LOG_2022-09-15T08_00UTC.csv
+Reading: /aerlift/data/0_synthetic/hhb/HHB99043_LOG_2022-09-15T08_00UTC.csv
+Reading: /aerlift/data/0_synthetic/hhb/HHB99044_LOG_2022-09-15T08_00UTC.csv
+Reading: /aerlift/data/0_synthetic/hhb/HHB99045_LOG_2022-09-15T08_00UTC.csv
+Reading: /aerlift/data/0_synthetic/hhb/HHB99046_LOG_2022-09-15T08_00UTC.csv
+Reading: /aerlift/data/0_synthetic/hhb/HHB99047_LOG_2022-09-15T08_00UTC.csv
+Reading: /aerlift/data/0_synthetic/hhb/HHB99048_LOG_2022-09-15T08_00UTC.csv
+Reading: /aerlift/data/0_synthetic/hhb/HHB99049_LOG_2022-09-15T08_00UTC.csv
+Reading: /aerlift/data/0_synthetic/hhb/HHB99050_LOG_2022-09-15T08_00UTC.csv
+Combined df dimensions: 1008000 rows x 12 cols
+Columns: DateTimeUTC, HHBserial, SampleName, SEN55_PM1.0, SEN55_PM2.5, SEN55_PM4.0, SEN55_PM10, SEN55_RH, SEN55_Temp, SEN55_RawVOC, SEN55_RawNOx, G.SCD30_CO2
+Wrote: /aerlift/data/1_munged_synth/hhb_intermediate.csv

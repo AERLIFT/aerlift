@@ -38,7 +38,7 @@ def read_aranet_file(file, timezone):
     df = pd.read_csv(file)
     df.columns = ['datetime', 'co2', 'temperature', 'rh', 'pressure']
     df.index = (pd.to_datetime(df['datetime'], format='%d/%m/%Y %I:%M:%S %p')
-                  .dt.tz_localize(timezone)
+                  .dt.tz_localize(timezone, ambiguous='NaT')
                   .dt.tz_convert('UTC')
                   .dt.tz_localize(None))
     df.index.name = 'datetime'
