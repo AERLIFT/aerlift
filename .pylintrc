@@ -1,0 +1,24 @@
+[MAIN]
+# Ignore cached/generated dirs
+ignore=__pycache__
+
+[MESSAGES CONTROL]
+disable=
+    # Snakemake dev-shim false positives
+    E0401,  # import-error        — third-party packages absent in lint env
+    E0601,  # used-before-assignment — snakemake try/except shim pattern
+    C0103,  # invalid-name        — snakemake/params/input/output class names
+    C0115,  # missing-class-docstring — dev shim inner classes
+    R0903,  # too-few-public-methods  — dev shim inner classes
+    C0413,  # wrong-import-position   — imports after try/except snakemake block
+    C0411,  # wrong-import-order      — same
+    R0801,  # duplicate-code          — similar boilerplate across scripts by design
+
+    # Style we do not enforce in this project
+    C0114,  # missing-module-docstring
+    C0116,  # missing-function-docstring
+    W1203,  # logging-fstring-interpolation — f-strings in log calls are fine
+    W0621   # redefined-outer-name — common in Snakemake script top-level blocks
+
+[FORMAT]
+max-line-length=130

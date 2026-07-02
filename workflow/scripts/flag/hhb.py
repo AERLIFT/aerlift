@@ -54,7 +54,7 @@ def get_warmup_mask(ds, warmup_minutes):
         first_ts = datetimes.min()
         cutoff   = first_ts + warmup_td
         warmup   = datetimes < cutoff
-        mask.loc[dict(sensor=sensor)] = xr.DataArray(warmup, dims='datetime')
+        mask.loc[{"sensor": sensor}] = xr.DataArray(warmup, dims='datetime')
     return mask
 
 def flag_hhb(ds, thresholds, flag_bits, alphasense):

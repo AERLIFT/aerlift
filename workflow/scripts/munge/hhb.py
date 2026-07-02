@@ -29,7 +29,7 @@ logging.basicConfig(
 log = logging.getLogger(__name__)
 
 # ── functions ─────────────────────────────────────────────────────────────────
-def load_hhb(input_csv, timezone, alphasense):
+def load_hhb(input_csv, alphasense):
     df = pd.read_csv(input_csv)
 
     # datetime
@@ -104,7 +104,6 @@ def add_metadata(ds, params):
 log.info("Starting HHB NetCDF conversion")
 
 df = load_hhb(snakemake.input.csv,
-              timezone   = snakemake.params.timezone,
               alphasense = snakemake.params.alphasense)
 
 log.info(f"{len(df)} records, {df['sensor'].nunique()} sensors")

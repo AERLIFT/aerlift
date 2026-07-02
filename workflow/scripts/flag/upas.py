@@ -57,23 +57,23 @@ def get_zero_run_mask(ds, var, zero_run_mins):
         in_run  = False
         run_start = None
 
-        for i, (dt, zero) in enumerate(zip(datetimes, is_zero)):
+        for dt, zero in zip(datetimes, is_zero):
             if zero and not in_run:
                 in_run    = True
                 run_start = dt
             elif not zero and in_run:
                 if dt - run_start >= zero_run_td:
                     run_mask = (datetimes >= run_start) & (datetimes < dt)
-                    mask.loc[dict(sensor=sensor)] = (
-                        mask.loc[dict(sensor=sensor)] | xr.DataArray(run_mask, dims='datetime')
+                    mask.loc[{"sensor": sensor}] = (
+                        mask.loc[{"sensor": sensor}] | xr.DataArray(run_mask, dims='datetime')
                     )
                 in_run = False
 
         # catch run extending to end of record
         if in_run and (datetimes[-1] - run_start >= zero_run_td):
             run_mask = datetimes >= run_start
-            mask.loc[dict(sensor=sensor)] = (
-                mask.loc[dict(sensor=sensor)] | xr.DataArray(run_mask, dims='datetime')
+            mask.loc[{"sensor": sensor}] = (
+                mask.loc[{"sensor": sensor}] | xr.DataArray(run_mask, dims='datetime')
             )
 
     return mask

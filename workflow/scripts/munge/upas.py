@@ -1,5 +1,5 @@
 from pathlib import Path
-from datetime import datetime, timezone
+from datetime import datetime
 import logging
 import pandas as pd
 import numpy as np
@@ -27,7 +27,7 @@ logging.basicConfig(
 log = logging.getLogger(__name__)
 
 # ── functions ─────────────────────────────────────────────────────────────────
-def load_upas(input_csv, timezone):
+def load_upas(input_csv):
     df = pd.read_csv(input_csv)
 
     # datetime
@@ -155,7 +155,7 @@ def add_metadata(ds, params):
 # ── main ──────────────────────────────────────────────────────────────────────
 log.info("Starting UPAS NetCDF conversion")
 
-df = load_upas(snakemake.input.csv, timezone=snakemake.params.timezone)
+df = load_upas(snakemake.input.csv)
 log.info(f"{len(df)} records, {df['sensor'].nunique()} sensors")
 
 ds_upas = (df.reset_index()
