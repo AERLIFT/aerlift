@@ -1,3 +1,4 @@
 /.env
 .snakemake/
 logs/
+docs/_build/
