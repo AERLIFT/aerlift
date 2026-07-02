@@ -1,6 +1,6 @@
 # AERLIFT
 
-Multi-instrument personal exposure monitoring pipeline built with Snakemake. Ingests raw data from five sensor platforms, standardizes to NetCDF4 (CF-1.8), and prepares merged exposure datasets for analysis.
+Multi-instrument personal exposure monitoring pipeline built with Snakemake. Ingests raw data from seven sensor platforms, standardizes to NetCDF4 (CF-1.8), and prepares merged exposure datasets for analysis.
  
 ---
  
@@ -11,6 +11,8 @@ Multi-instrument personal exposure monitoring pipeline built with Snakemake. Ing
 | Anemometer (CP202526) | Air flow, flow indicator | `.txt` |
 | Aranet4 | CO₂, temperature, RH, pressure | `.csv` |
 | Lascar EL-USB | CO | `.txt` |
+| Atmotube Pro | PM1/2.5/10, AQS, TVOC, NOx index, CO₂, temperature, RH, pressure, GPS | `.csv` |
+| Aulifants | Voltage, current, power, power factor, cumulative energy | `.CSV` |
 | Home Health Box (HHB v2) | PM, CO₂, NO₂, O₃, VOC, NOx, met | `.csv` |
 | UPAS v2.1 | PM (mass + number), met, light, accel | `.txt` |
  
@@ -19,16 +21,16 @@ Multi-instrument personal exposure monitoring pipeline built with Snakemake. Ing
 ## Pipeline
  
 ```
-0_raw → 1_munge → 2_trim → 3_flag → 4_merge → 5_network
+0_raw → 1_munge → 2_trim → 3_flag
 ```
  
-| Stage | Description                                                                                        |
-|---|----------------------------------------------------------------------------------------------------|
-| munge | Parse raw formats, standardize datetime to UTC, rename variables, deduplicate, write CF-1.8 NetCDF |
-| trim | Clip to campaign time bounds, drop excluded sensor IDs                                             |
-| flag | Bitmask QA/QC per variable — flag but keep, all thresholds in config                               |
-| merge | Join all instruments by household + datetime, preserve built-in resolution                         |
-| network | Resample to minute/hour/integrated, exclude flagged, report mean + std + n                         |
+| Stage | Description                                                                                        | Status |
+|---|---|---|
+| munge | Parse raw formats, standardize datetime to UTC, rename variables, deduplicate, write CF-1.8 NetCDF | ✓ |
+| trim | Clip to campaign time bounds, drop excluded sensor IDs                                             | ✓ |
+| flag | Bitmask QA/QC per variable — flag but keep, all thresholds in config                               | ✓ |
+| merge | Join all instruments by household + datetime, preserve built-in resolution                         | planned |
+| network | Resample to minute/hour/integrated, exclude flagged, report mean + std + n                         | planned |
  
 ---
  
@@ -38,39 +40,34 @@ Multi-instrument personal exposure monitoring pipeline built with Snakemake. Ing
 aerlift/
 ├── config/
 │   ├── config.yaml              # paths, parameters, instrument settings
-│   └── samples.tsv              # household → sensor deployment mapping
+│   └── config_synthetic.yaml    # synthetic data paths for pipeline testing
 ├── workflow/
-│   ├── Snakefile                # entry point, rule all
+│   ├── snakefile                # entry point, rule all
 │   ├── rules/
 │   │   ├── munge.smk
 │   │   ├── trim.smk
-│   │   ├── flag.smk
-│   │   ├── merge.smk
-│   │   └── network.smk
+│   │   └── flag.smk
 │   ├── scripts/
 │   │   ├── munge/
 │   │   │   ├── anemometer.py
 │   │   │   ├── aranet.py
 │   │   │   ├── lascar.py
+│   │   │   ├── atmotube.py
+│   │   │   ├── aulifants.py
 │   │   │   ├── hhb.R            # uses astr package
-│   │   │   ├── hhb_to_nc.py
+│   │   │   ├── hhb.py
 │   │   │   ├── upas.R           # uses astr package
-│   │   │   └── upas_to_nc.py
-│   │   ├── trim/
-│   │   │   └── trim.py          # generic — runs for all instruments
-│   │   ├── flag/
-│   │   │   ├── utils_flag.py
-│   │   │   ├── flag_anemometer.py
-│   │   │   ├── flag_aranet.py
-│   │   │   ├── flag_lascar.py
-│   │   │   ├── flag_hhb.py
-│   │   │   └── flag_upas.py
-│   │   ├── merge/
-│   │   │   └── merge.py
-│   │   └── network/
-│   │       ├── minute.py
-│   │       ├── hour.py
-│   │       └── integrated.py
+│   │   │   └── upas.py
+│   │   ├── trim.py              # generic — runs for all instruments
+│   │   └── flag/
+│   │       ├── utils.py
+│   │       ├── anemometer.py
+│   │       ├── aranet.py
+│   │       ├── lascar.py
+│   │       ├── atmotube.py
+│   │       ├── aulifants.py
+│   │       ├── hhb.py
+│   │       └── upas.py
 │   └── envs/
 │       ├── python.yaml          # all Python rules
 │       └── r.yaml               # R rules (hhb.R, upas.R)
@@ -91,13 +88,13 @@ data/
 │   ├── anemometer/
 │   ├── aranet/
 │   ├── lascar/
+│   ├── atmotube/
+│   ├── aulifants/
 │   ├── hhb/
 │   └── upas/
 ├── 1_munged/        # one .nc + summary .csv per instrument
 ├── 2_trimmed/       # one .nc per instrument
-├── 3_flagged/       # one .nc + flags .csv per instrument
-├── 4_merged/        # merged.nc (household, datetime)
-└── 5_network/       # minute.nc, hour.nc, integrated.nc
+└── 3_flagged/       # one .nc + flags .csv per instrument
 ```
  
 ---
@@ -114,8 +111,6 @@ raw_dir:     '/path/to/data/0_raw'
 munged_dir:  '/path/to/data/1_munged'
 trimmed_dir: '/path/to/data/2_trimmed'
 flagged_dir: '/path/to/data/3_flagged'
-merged_dir:  '/path/to/data/4_merged'
-network_dir: '/path/to/data/5_network'
 ```
  
 Per-rule conda environments are defined in `workflow/envs/` and managed automatically by Snakemake — no manual environment setup required.
@@ -168,22 +163,22 @@ Docker builds the image on first run (10–15 minutes — conda env build). Subs
 ## Running the Pipeline
  
 ```bash
-# from repo root — always use --use-conda
+# from repo root — always use --use-conda (or use Docker, see above)
  
 # dry run — check DAG without executing
-snakemake -n --reason --use-conda
+snakemake -n --reason --use-conda --snakefile workflow/snakefile
  
 # visualize DAG
-snakemake --dag | dot -Tsvg > dag.svg && open dag.svg
+snakemake --dag --snakefile workflow/snakefile | dot -Tsvg > dag.svg && open dag.svg
  
 # run full pipeline
-snakemake --cores 1 --use-conda
+snakemake --cores 1 --use-conda --snakefile workflow/snakefile
  
 # run a single target
-snakemake --cores 1 --use-conda results/2_trimmed/aranet.nc
+snakemake --cores 1 --use-conda --snakefile workflow/snakefile /path/to/data/2_trimmed/aranet.nc
  
 # lint rules
-snakemake --lint
+snakemake --lint --snakefile workflow/snakefile
 ```
  
 ---
@@ -197,10 +192,6 @@ snakemake --lint
 | trim | `2_trimmed/{instrument}.nc` | Campaign-period data only |
 | flag | `3_flagged/{instrument}.nc` | All data + bitmask flag variables |
 | flag | `3_flagged/{instrument}_flags.csv` | Flag counts per bit per variable |
-| merge | `4_merged/merged.nc` | All instruments, household dimension |
-| network | `5_network/minute.nc` | 1-min resampled, unflagged only |
-| network | `5_network/hour.nc` | 1-hr resampled, unflagged only |
-| network | `5_network/integrated.nc` | Deployment totals, no time dim |
  
 NetCDF files are indexed by `(sensor, datetime)` with datetime in UTC.
 Original local timezone stored in global attributes (`timezone_local`).
@@ -217,18 +208,23 @@ campaign:
   timezone: 'America/Los_Angeles'
   start:    '2022-09-01'
   end:      '2023-03-31'
-  exclude:
-    anemometer: []
-    aranet:     []
-    lascar:     []
-    hhb:        []
-    upas:       []
+
+exclude:
+  anemometer: []
+  aranet:     []
+  lascar:     []
+  atmotube:   []
+  aulifants:  []
+  hhb:        []
+  upas:       []
  
 instruments:
   hhb:
     alphasense:
       position_1: 'NO2'   # update per campaign deployment
       position_2: 'O3'
+      position_3: null
+      position_4: null
  
 flag:
   universal:
@@ -236,9 +232,16 @@ flag:
     temperature_max: 50.0
     rh_min:          0.0
     rh_max:          100.0
- 
-network:
-  resample_method: 'mean'
+  atmotube:
+    thresholds:
+      co_min: 0.0
+      co_max: 200.0
+      voc_raw_min: 0.0
+      pm_min: 0.0
+  aulifants:
+    thresholds:
+      voltage_min: 0.0
+      voltage_max: 240.0
 ```
  
 Alphasense sensor positions must be updated in `config.yaml` to match the physical sensors installed in each HHB unit for a given campaign. All QA/QC thresholds are configurable without touching scripts.
@@ -249,7 +252,7 @@ Alphasense sensor positions must be updated in `config.yaml` to match the physic
  
 | File | Used by |
 |---|---|
-| `workflow/envs/python.yaml` | All Python rules (munge, trim, flag, merge, network) |
+| `workflow/envs/python.yaml` | All Python rules (munge, trim, flag) |
 | `workflow/envs/r.yaml` | R rules only (`hhb.R`, `upas.R`) |
  
 Run with `--use-conda` to have Snakemake create and manage these automatically.
