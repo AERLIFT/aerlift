@@ -80,6 +80,8 @@ def add_metadata(ds, params):
         'institution':    'UC Berkeley School of Public Health',
         'creator_name':   'Mark Campmier, PhD',
     }
+    if getattr(params, 'synthetic', None) == 'true':
+        ds.attrs['SYNTHETIC'] = 'true'
     ds['co2'].attrs         = {'long_name': 'carbon dioxide mixing ratio',
                                'units': 'ppm', 'instrument': 'Aranet4'}
     ds['temperature'].attrs = {'long_name': 'ambient temperature',

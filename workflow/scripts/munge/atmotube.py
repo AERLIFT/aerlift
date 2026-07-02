@@ -83,6 +83,8 @@ def add_metadata(ds, params):
         'institution':    'UC Berkeley School of Public Health',
         'creator_name':   'Mark Campmier, PhD',
     }
+    if getattr(params, 'synthetic', None) == 'true':
+        ds.attrs['SYNTHETIC'] = 'true'
     ds['aqs'].attrs         = {'long_name': 'air quality score',
                                'units': 'None', 'instrument': 'Atmotube'}
     ds['pm1'].attrs = {'long_name': 'PM1 mass concentration',

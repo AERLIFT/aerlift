@@ -82,6 +82,8 @@ def add_metadata(ds, params):
         'institution':    'UC Berkeley School of Public Health',
         'creator_name':   'Mark Campmier, PhD',
     }
+    if getattr(params, 'synthetic', None) == 'true':
+        ds.attrs['SYNTHETIC'] = 'true'
     ds['co'].attrs = {
         'long_name':  'carbon monoxide mixing ratio',
         'units':      'ppm',
