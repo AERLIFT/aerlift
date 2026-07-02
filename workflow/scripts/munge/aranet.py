@@ -38,7 +38,7 @@ def read_aranet_file(file, timezone):
     df = pd.read_csv(file)
     df.columns = ['datetime', 'co2', 'temperature', 'rh', 'pressure']
     df.index = (pd.to_datetime(df['datetime'], format='%d/%m/%Y %I:%M:%S %p')
-                  .dt.tz_localize(timezone)
+                  .dt.tz_localize(timezone, ambiguous='NaT')
                   .dt.tz_convert('UTC')
                   .dt.tz_localize(None))
     df.index.name = 'datetime'
@@ -80,6 +80,8 @@ def add_metadata(ds, params):
         'institution':    'UC Berkeley School of Public Health',
         'creator_name':   'Mark Campmier, PhD',
     }
+    if getattr(params, 'synthetic', None) == 'true':
+        ds.attrs['SYNTHETIC'] = 'true'
     ds['co2'].attrs         = {'long_name': 'carbon dioxide mixing ratio',
                                'units': 'ppm', 'instrument': 'Aranet4'}
     ds['temperature'].attrs = {'long_name': 'ambient temperature',

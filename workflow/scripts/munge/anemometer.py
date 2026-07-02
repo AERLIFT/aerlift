@@ -95,6 +95,8 @@ def add_metadata(ds, params):
         'institution':    'UC Berkeley School of Public Health',
         'creator_name':   'Mark Campmier, PhD',
     }
+    if getattr(params, 'synthetic', None) == 'true':
+        ds.attrs['SYNTHETIC'] = 'true'
     ds['air_flow'].attrs = {
         'long_name':  'air velocity',
         'units':      'm/s',

@@ -1,11 +1,105 @@
-Starting UPAS munging at 2026-06-11 23:02:00.084943
-raw_dir: /aerlift/data/0_raw
-Found 3 files:
-/aerlift/data/0_raw/upas/PSP00054_LOG_2022-09-06T19_37_17UTC_E102____________C3798_____.txt
-/aerlift/data/0_raw/upas/PSP00054_LOG_2022-09-13T18_57_39UTC_E103____________C3858_____.txt
-/aerlift/data/0_raw/upas/PSP00054_LOG_2022-09-17T21_59_27UTC_E106____________C3805_____.txt
-Reading: /aerlift/data/0_raw/upas/PSP00054_LOG_2022-09-06T19_37_17UTC_E102____________C3798_____.txt
-Reading: /aerlift/data/0_raw/upas/PSP00054_LOG_2022-09-13T18_57_39UTC_E103____________C3858_____.txt
-Reading: /aerlift/data/0_raw/upas/PSP00054_LOG_2022-09-17T21_59_27UTC_E106____________C3805_____.txt
-Combined df: 17224 rows x 50 cols
-Wrote: /aerlift/data/1_munged/upas_intermediate.csv
+Starting UPAS munging at 2026-07-02 22:13:00.172415
+raw_dir: /aerlift/data/0_synthetic
+Found 50 files:
+/aerlift/data/0_synthetic/upas/PSP99001_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+/aerlift/data/0_synthetic/upas/PSP99002_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+/aerlift/data/0_synthetic/upas/PSP99003_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+/aerlift/data/0_synthetic/upas/PSP99004_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+/aerlift/data/0_synthetic/upas/PSP99005_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+/aerlift/data/0_synthetic/upas/PSP99006_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+/aerlift/data/0_synthetic/upas/PSP99007_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+/aerlift/data/0_synthetic/upas/PSP99008_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+/aerlift/data/0_synthetic/upas/PSP99009_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+/aerlift/data/0_synthetic/upas/PSP99010_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+/aerlift/data/0_synthetic/upas/PSP99011_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+/aerlift/data/0_synthetic/upas/PSP99012_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+/aerlift/data/0_synthetic/upas/PSP99013_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+/aerlift/data/0_synthetic/upas/PSP99014_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+/aerlift/data/0_synthetic/upas/PSP99015_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+/aerlift/data/0_synthetic/upas/PSP99016_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+/aerlift/data/0_synthetic/upas/PSP99017_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+/aerlift/data/0_synthetic/upas/PSP99018_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+/aerlift/data/0_synthetic/upas/PSP99019_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+/aerlift/data/0_synthetic/upas/PSP99020_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+/aerlift/data/0_synthetic/upas/PSP99021_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+/aerlift/data/0_synthetic/upas/PSP99022_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+/aerlift/data/0_synthetic/upas/PSP99023_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+/aerlift/data/0_synthetic/upas/PSP99024_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+/aerlift/data/0_synthetic/upas/PSP99025_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+/aerlift/data/0_synthetic/upas/PSP99026_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+/aerlift/data/0_synthetic/upas/PSP99027_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+/aerlift/data/0_synthetic/upas/PSP99028_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+/aerlift/data/0_synthetic/upas/PSP99029_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+/aerlift/data/0_synthetic/upas/PSP99030_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+/aerlift/data/0_synthetic/upas/PSP99031_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+/aerlift/data/0_synthetic/upas/PSP99032_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+/aerlift/data/0_synthetic/upas/PSP99033_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+/aerlift/data/0_synthetic/upas/PSP99034_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+/aerlift/data/0_synthetic/upas/PSP99035_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+/aerlift/data/0_synthetic/upas/PSP99036_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+/aerlift/data/0_synthetic/upas/PSP99037_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+/aerlift/data/0_synthetic/upas/PSP99038_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+/aerlift/data/0_synthetic/upas/PSP99039_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+/aerlift/data/0_synthetic/upas/PSP99040_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+/aerlift/data/0_synthetic/upas/PSP99041_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+/aerlift/data/0_synthetic/upas/PSP99042_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+/aerlift/data/0_synthetic/upas/PSP99043_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+/aerlift/data/0_synthetic/upas/PSP99044_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+/aerlift/data/0_synthetic/upas/PSP99045_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+/aerlift/data/0_synthetic/upas/PSP99046_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+/aerlift/data/0_synthetic/upas/PSP99047_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+/aerlift/data/0_synthetic/upas/PSP99048_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+/aerlift/data/0_synthetic/upas/PSP99049_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+/aerlift/data/0_synthetic/upas/PSP99050_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+Reading: /aerlift/data/0_synthetic/upas/PSP99001_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+Reading: /aerlift/data/0_synthetic/upas/PSP99002_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+Reading: /aerlift/data/0_synthetic/upas/PSP99003_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+Reading: /aerlift/data/0_synthetic/upas/PSP99004_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+Reading: /aerlift/data/0_synthetic/upas/PSP99005_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+Reading: /aerlift/data/0_synthetic/upas/PSP99006_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+Reading: /aerlift/data/0_synthetic/upas/PSP99007_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+Reading: /aerlift/data/0_synthetic/upas/PSP99008_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+Reading: /aerlift/data/0_synthetic/upas/PSP99009_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+Reading: /aerlift/data/0_synthetic/upas/PSP99010_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+Reading: /aerlift/data/0_synthetic/upas/PSP99011_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+Reading: /aerlift/data/0_synthetic/upas/PSP99012_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+Reading: /aerlift/data/0_synthetic/upas/PSP99013_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+Reading: /aerlift/data/0_synthetic/upas/PSP99014_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+Reading: /aerlift/data/0_synthetic/upas/PSP99015_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+Reading: /aerlift/data/0_synthetic/upas/PSP99016_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+Reading: /aerlift/data/0_synthetic/upas/PSP99017_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+Reading: /aerlift/data/0_synthetic/upas/PSP99018_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+Reading: /aerlift/data/0_synthetic/upas/PSP99019_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+Reading: /aerlift/data/0_synthetic/upas/PSP99020_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+Reading: /aerlift/data/0_synthetic/upas/PSP99021_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+Reading: /aerlift/data/0_synthetic/upas/PSP99022_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+Reading: /aerlift/data/0_synthetic/upas/PSP99023_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+Reading: /aerlift/data/0_synthetic/upas/PSP99024_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+Reading: /aerlift/data/0_synthetic/upas/PSP99025_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+Reading: /aerlift/data/0_synthetic/upas/PSP99026_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+Reading: /aerlift/data/0_synthetic/upas/PSP99027_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+Reading: /aerlift/data/0_synthetic/upas/PSP99028_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+Reading: /aerlift/data/0_synthetic/upas/PSP99029_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+Reading: /aerlift/data/0_synthetic/upas/PSP99030_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+Reading: /aerlift/data/0_synthetic/upas/PSP99031_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+Reading: /aerlift/data/0_synthetic/upas/PSP99032_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+Reading: /aerlift/data/0_synthetic/upas/PSP99033_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+Reading: /aerlift/data/0_synthetic/upas/PSP99034_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+Reading: /aerlift/data/0_synthetic/upas/PSP99035_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+Reading: /aerlift/data/0_synthetic/upas/PSP99036_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+Reading: /aerlift/data/0_synthetic/upas/PSP99037_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+Reading: /aerlift/data/0_synthetic/upas/PSP99038_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+Reading: /aerlift/data/0_synthetic/upas/PSP99039_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+Reading: /aerlift/data/0_synthetic/upas/PSP99040_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+Reading: /aerlift/data/0_synthetic/upas/PSP99041_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+Reading: /aerlift/data/0_synthetic/upas/PSP99042_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+Reading: /aerlift/data/0_synthetic/upas/PSP99043_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+Reading: /aerlift/data/0_synthetic/upas/PSP99044_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+Reading: /aerlift/data/0_synthetic/upas/PSP99045_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+Reading: /aerlift/data/0_synthetic/upas/PSP99046_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+Reading: /aerlift/data/0_synthetic/upas/PSP99047_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+Reading: /aerlift/data/0_synthetic/upas/PSP99048_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+Reading: /aerlift/data/0_synthetic/upas/PSP99049_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+Reading: /aerlift/data/0_synthetic/upas/PSP99050_LOG_2022-09-15T08_00_00UTC_SYNTHETIC_______C0000_____.txt
+Combined df: 1008000 rows x 50 cols
+Wrote: /aerlift/data/1_munged_synth/upas_intermediate.csv

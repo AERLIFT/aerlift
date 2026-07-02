@@ -1,18 +1,22 @@
-#%% paths
+#%% paths (Docker container paths — host DATA_DIR mounted at /aerlift/data)
 data_dir:    '/aerlift/data'
-raw_dir:     '/aerlift/data/0_raw'
-munged_dir:  '/aerlift/data/1_munged'
-trimmed_dir: '/aerlift/data/2_trimmed'
-flagged_dir: 'aerlift/data/3_flagged'
+raw_dir:     '/aerlift/data/0_synthetic'
+munged_dir:  '/aerlift/data/1_munged_synth'
+trimmed_dir: '/aerlift/data/2_trimmed_synth'
+flagged_dir: '/aerlift/data/3_flagged_synth'
 results_dir: 'results'
 log_dir:     'logs'
 
-#%% campaign
+#%% synthetic flag
+synthetic:    'true'
+metadata_csv: '/aerlift/data/0_synthetic/campaign_metadata.csv'
+
+#%% campaign  (7-day window matching generate_campaign.py defaults)
 campaign:
   name:     'AERLIFT'
   timezone: 'America/Los_Angeles'
-  start: '2022-09-01'
-  end: '2023-03-31'
+  start: '2022-09-15'
+  end:   '2022-09-22'
 
 #%% instruments
 instruments:
@@ -51,8 +55,6 @@ instruments:
       - 'SEN55_RawVOC'
       - 'SEN55_RawNOx'
       - 'G.SCD30_CO2'
-      - 'G.Alphasense1_Algorithm1'
-      - 'G.Alphasense2_Algorithm1'
   upas:
     file_ext: '.txt'
     pattern: '*.txt'
@@ -108,10 +110,10 @@ instruments:
       - 'LogFilename'
       - 'StartDateTimeUTC'
 
-#%% trim criteria
+#%% trim criteria  (no exclusions — all 50 synthetic sensors are valid)
 exclude:
   anemometer: []
-  aranet:     ['16A28']
+  aranet:     []
   lascar:     []
   hhb:        []
   upas:       []
@@ -121,11 +123,11 @@ exclude:
 #%% flag criteria
 flag:
   universal:
-    temperature_min:  -5.0    # cold winter nights
-    temperature_max:  50.0    # extreme summer days
+    temperature_min:  -5.0
+    temperature_max:  50.0
     rh_min:           0.0
     rh_max:           100.0
-    pressure_min:     950.0   # hPa, accounting for altitude variation
+    pressure_min:     950.0
     pressure_max:     1050.0
 
   anemometer:
@@ -158,13 +160,11 @@ flag:
 
   atmotube:
     bits:
-      4: 'co_negative'
-      8: 'co_high'
+      4: 'pm_negative'
+      8: 'voc_negative'
     thresholds:
-      co_min: 0.0
-      co_max: 200.0
+      pm_min:      0.0
       voc_raw_min: 0.0
-      pm_min: 0.0
 
   aulifants:
     bits:
@@ -173,7 +173,6 @@ flag:
     thresholds:
       voltage_min: 0.0
       voltage_max: 240.0
-
 
   hhb:
     bits:
