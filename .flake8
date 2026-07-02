@@ -1,0 +1,7 @@
+[flake8]
+max-line-length = 88
+# E203: whitespace before ':' — conflicts with black slice formatting
+# W503: line break before binary operator — conflicts with black
+# E501: line too long — black owns line length
+# E402: module import not at top — Snakemake scripts import after try/except shim
+extend-ignore = E203, W503, E501, E402

@@ -1,4 +1,4 @@
-name: Pylint
+name: Lint
 
 on: [push]
 
@@ -13,7 +13,12 @@ jobs:
         environment-file: workflow/envs/python.yaml
         activate-environment: aerlift-python
         auto-activate-base: false
-    - name: Analysing the code with pylint
+    - name: black
       shell: bash -el {0}
-      run: |
-        pylint $(git ls-files '*.py')
+      run: black --check $(git ls-files '*.py')
+    - name: flake8
+      shell: bash -el {0}
+      run: flake8 $(git ls-files '*.py')
+    - name: pylint
+      shell: bash -el {0}
+      run: pylint $(git ls-files '*.py')

@@ -12,3 +12,5 @@ dependencies:
   - pyyaml
   - snakemake
   - pylint
+  - black
+  - flake8
