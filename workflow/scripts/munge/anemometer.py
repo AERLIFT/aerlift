@@ -35,7 +35,7 @@ log = logging.getLogger(__name__)
 
 # ── functions ─────────────────────────────────────────────────────────────────
 def get_files(raw_dir, ext=".txt") -> list:
-    """ Finds all anemometer files in anemometer directory.
+    """Finds all anemometer files in anemometer directory.
     Args:
         raw_dir: path to raw data directory
         ext: file extension to search for (default: .txt)
@@ -132,33 +132,34 @@ def add_metadata(ds, params):
     return ds
 
 
-# ── main ──────────────────────────────────────────────────────────────────────
-log.info("Starting anemometer munging")
+if __name__ == "__main__":
+    # ── main ──────────────────────────────────────────────────────────────────────
+    log.info("Starting anemometer munging")
 
-ds_flw = process_anemometer(snakemake.params)
-ds_flw = add_metadata(ds_flw, snakemake.params)
+    ds_flw = process_anemometer(snakemake.params)
+    ds_flw = add_metadata(ds_flw, snakemake.params)
 
-# summary csv
-files = get_files(snakemake.params.raw_dir)
-summary = pd.DataFrame(
-    {
-        "n_files": [len(files)],
-        "n_records": [ds_flw.sizes["datetime"]],
-        "flow_active_pct": [float(ds_flw["flow_indicator"].mean()) * 100],
-        "air_flow_mean": [float(ds_flw["air_flow"].mean())],
-        "air_flow_max": [float(ds_flw["air_flow"].max())],
-    }
-)
-summary.to_csv(snakemake.output.csv, index=False)
-log.info(f"Wrote {snakemake.output.csv}")
+    # summary csv
+    files = get_files(snakemake.params.raw_dir)
+    summary = pd.DataFrame(
+        {
+            "n_files": [len(files)],
+            "n_records": [ds_flw.sizes["datetime"]],
+            "flow_active_pct": [float(ds_flw["flow_indicator"].mean()) * 100],
+            "air_flow_mean": [float(ds_flw["air_flow"].mean())],
+            "air_flow_max": [float(ds_flw["air_flow"].max())],
+        }
+    )
+    summary.to_csv(snakemake.output.csv, index=False)
+    log.info(f"Wrote {snakemake.output.csv}")
 
-# netcdf
-out_path = Path(snakemake.output.nc)
-out_path.parent.mkdir(parents=True, exist_ok=True)
-ds_flw.to_netcdf(
-    out_path,
-    encoding={
-        v: {"zlib": True, "complevel": 4} for v in ["air_flow", "flow_indicator"]
-    },
-)
-log.info(f"Wrote {out_path}")
+    # netcdf
+    out_path = Path(snakemake.output.nc)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    ds_flw.to_netcdf(
+        out_path,
+        encoding={
+            v: {"zlib": True, "complevel": 4} for v in ["air_flow", "flow_indicator"]
+        },
+    )
+    log.info(f"Wrote {out_path}")

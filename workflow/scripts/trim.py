@@ -94,24 +94,25 @@ def update_metadata(ds, params):
     return ds
 
 
-# ── main ──────────────────────────────────────────────────────────────────────
-log.info(f"Starting trim for {snakemake.params.instrument}")
+if __name__ == "__main__":
+    # ── main ──────────────────────────────────────────────────────────────────────
+    log.info(f"Starting trim for {snakemake.params.instrument}")
 
-ds = xr.open_dataset(snakemake.input.nc)
-log.info(f"Loaded {snakemake.input.nc}: {dict(ds.sizes)}")
+    ds = xr.open_dataset(snakemake.input.nc)
+    log.info(f"Loaded {snakemake.input.nc}: {dict(ds.sizes)}")
 
-ds = trim(
-    ds,
-    start=snakemake.params.start,
-    end=snakemake.params.end,
-    exclude=snakemake.params.exclude,
-)
+    ds = trim(
+        ds,
+        start=snakemake.params.start,
+        end=snakemake.params.end,
+        exclude=snakemake.params.exclude,
+    )
 
-ds = update_metadata(ds, snakemake.params)
+    ds = update_metadata(ds, snakemake.params)
 
-# save
-out_path = Path(snakemake.output.nc)
-out_path.parent.mkdir(parents=True, exist_ok=True)
+    # save
+    out_path = Path(snakemake.output.nc)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
 
-ds.to_netcdf(out_path, encoding=get_encoding(ds))
-log.info(f"Wrote {out_path}")
+    ds.to_netcdf(out_path, encoding=get_encoding(ds))
+    log.info(f"Wrote {out_path}")

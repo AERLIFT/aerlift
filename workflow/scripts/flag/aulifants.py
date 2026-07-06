@@ -70,32 +70,35 @@ def update_metadata(ds):
     return ds
 
 
-# ── main ──────────────────────────────────────────────────────────────────────
-log.info("Starting Aulifants flagging")
+if __name__ == "__main__":
+    # ── main ──────────────────────────────────────────────────────────────────────
+    log.info("Starting Aulifants flagging")
 
-ds = xr.open_dataset(snakemake.input.nc)
-log.info(f"Loaded {snakemake.input.nc}: {dict(ds.sizes)}")
+    ds = xr.open_dataset(snakemake.input.nc)
+    log.info(f"Loaded {snakemake.input.nc}: {dict(ds.sizes)}")
 
-flag_bits = {int(k): v for k, v in snakemake.params.flag_bits.items()}
-thresholds = snakemake.params.thresholds
+    flag_bits = {int(k): v for k, v in snakemake.params.flag_bits.items()}
+    thresholds = snakemake.params.thresholds
 
-ds = flag_aulifants(ds, thresholds, flag_bits)
-ds = update_metadata(ds)
+    ds = flag_aulifants(ds, thresholds, flag_bits)
+    ds = update_metadata(ds)
 
-# summary csv
-all_bits = {1: "out_of_range", **flag_bits}
-summary = flag_summary(ds, ["flag_voltage"], all_bits)
-summary.to_csv(snakemake.output.csv, index=False)
-log.info(f"Wrote {snakemake.output.csv}")
+    # summary csv
+    all_bits = {1: "out_of_range", **flag_bits}
+    summary = flag_summary(ds, ["flag_voltage"], all_bits)
+    summary.to_csv(snakemake.output.csv, index=False)
+    log.info(f"Wrote {snakemake.output.csv}")
 
-# netcdf
-out_path = Path(snakemake.output.nc)
-out_path.parent.mkdir(parents=True, exist_ok=True)
+    # netcdf
+    out_path = Path(snakemake.output.nc)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
 
-num_vars = [
-    v
-    for v in ds.data_vars
-    if ds[v].dtype in [np.float32, np.float64, np.int32, np.int64, np.int16]
-]
-ds.to_netcdf(out_path, encoding={v: {"zlib": True, "complevel": 4} for v in num_vars})
-log.info(f"Wrote {out_path}")
+    num_vars = [
+        v
+        for v in ds.data_vars
+        if ds[v].dtype in [np.float32, np.float64, np.int32, np.int64, np.int16]
+    ]
+    ds.to_netcdf(
+        out_path, encoding={v: {"zlib": True, "complevel": 4} for v in num_vars}
+    )
+    log.info(f"Wrote {out_path}")

@@ -128,40 +128,43 @@ def add_metadata(ds, params):
     return ds
 
 
-# ── main ──────────────────────────────────────────────────────────────────────
-log.info("Starting HHB NetCDF conversion")
+if __name__ == "__main__":
+    # ── main ──────────────────────────────────────────────────────────────────────
+    log.info("Starting HHB NetCDF conversion")
 
-df = load_hhb(snakemake.input.csv, alphasense=snakemake.params.alphasense)
+    df = load_hhb(snakemake.input.csv, alphasense=snakemake.params.alphasense)
 
-log.info(f"{len(df)} records, {df['sensor'].nunique()} sensors")
+    log.info(f"{len(df)} records, {df['sensor'].nunique()} sensors")
 
-ds_hhb = df.reset_index().infer_objects().set_index(["sensor", "datetime"]).to_xarray()
-ds_hhb = add_metadata(ds_hhb, snakemake.params)
+    ds_hhb = (
+        df.reset_index().infer_objects().set_index(["sensor", "datetime"]).to_xarray()
+    )
+    ds_hhb = add_metadata(ds_hhb, snakemake.params)
 
-# summary csv
-summary = pd.DataFrame(
-    {
-        "n_records": [ds_hhb.sizes["datetime"]],
-        "n_sensors": [ds_hhb.sizes["sensor"]],
-        "pm25_mean": [float(ds_hhb["sen_pm25_raw"].mean())],
-        "pm25_max": [float(ds_hhb["sen_pm25_raw"].max())],
-        "temp_mean": [float(ds_hhb["sen_temperature"].mean())],
-        "rh_mean": [float(ds_hhb["sen_rh"].mean())],
-    }
-)
-summary.to_csv(snakemake.output.csv, index=False)
-log.info(f"Wrote {snakemake.output.csv}")
+    # summary csv
+    summary = pd.DataFrame(
+        {
+            "n_records": [ds_hhb.sizes["datetime"]],
+            "n_sensors": [ds_hhb.sizes["sensor"]],
+            "pm25_mean": [float(ds_hhb["sen_pm25_raw"].mean())],
+            "pm25_max": [float(ds_hhb["sen_pm25_raw"].max())],
+            "temp_mean": [float(ds_hhb["sen_temperature"].mean())],
+            "rh_mean": [float(ds_hhb["sen_rh"].mean())],
+        }
+    )
+    summary.to_csv(snakemake.output.csv, index=False)
+    log.info(f"Wrote {snakemake.output.csv}")
 
-# netcdf
-out_path = Path(snakemake.output.nc)
-out_path.parent.mkdir(parents=True, exist_ok=True)
+    # netcdf
+    out_path = Path(snakemake.output.nc)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
 
-num_vars = [
-    v
-    for v in ds_hhb.data_vars
-    if ds_hhb[v].dtype in [np.float32, np.float64, np.int32, np.int64]
-]
-ds_hhb.to_netcdf(
-    out_path, encoding={v: {"zlib": True, "complevel": 4} for v in num_vars}
-)
-log.info(f"Wrote {out_path}")
+    num_vars = [
+        v
+        for v in ds_hhb.data_vars
+        if ds_hhb[v].dtype in [np.float32, np.float64, np.int32, np.int64]
+    ]
+    ds_hhb.to_netcdf(
+        out_path, encoding={v: {"zlib": True, "complevel": 4} for v in num_vars}
+    )
+    log.info(f"Wrote {out_path}")

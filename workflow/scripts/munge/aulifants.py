@@ -141,51 +141,54 @@ def add_metadata(ds, params):
     return ds
 
 
-# ── main ──────────────────────────────────────────────────────────────────────
-log.info("Starting Aulifants munging")
+if __name__ == "__main__":
+    # ── main ──────────────────────────────────────────────────────────────────────
+    log.info("Starting Aulifants munging")
 
-ds_aulifants = process_aulifants(snakemake.params)
-_auli_files, _ = get_files(snakemake.params.raw_dir)
-log.info(f"Processed {len(_auli_files)} files")
+    ds_aulifants = process_aulifants(snakemake.params)
+    _auli_files, _ = get_files(snakemake.params.raw_dir)
+    log.info(f"Processed {len(_auli_files)} files")
 
-ds_aulifants = add_metadata(ds_aulifants, snakemake.params)
+    ds_aulifants = add_metadata(ds_aulifants, snakemake.params)
 
-# summary csv
-_sum_files, _ = get_files(snakemake.params.raw_dir)
-summary = pd.DataFrame(
-    {
-        "n_files": [len(_sum_files)],
-        "n_records": [ds_aulifants.sizes["datetime"]],
-        "voltage_mean": [float(ds_aulifants["voltage"].mean())],
-        "voltage_max": [float(ds_aulifants["voltage"].max())],
-        "current_mean": [float(ds_aulifants["current"].mean())],
-        "current_max": [float(ds_aulifants["current"].max())],
-        "power_mean": [float(ds_aulifants["power"].mean())],
-        "power_max": [float(ds_aulifants["power"].max())],
-        "power_factor_mean": [float(ds_aulifants["power_factor"].mean())],
-        "power_factor_max": [float(ds_aulifants["power_factor"].max())],
-        "cummulative_energy_mean": [float(ds_aulifants["cummulative_energy"].mean())],
-        "cummulative_energy_max": [float(ds_aulifants["cummulative_energy"].max())],
-    }
-)
-summary.to_csv(snakemake.output.csv, index=False)
-log.info(f"Wrote {snakemake.output.csv}")
+    # summary csv
+    _sum_files, _ = get_files(snakemake.params.raw_dir)
+    summary = pd.DataFrame(
+        {
+            "n_files": [len(_sum_files)],
+            "n_records": [ds_aulifants.sizes["datetime"]],
+            "voltage_mean": [float(ds_aulifants["voltage"].mean())],
+            "voltage_max": [float(ds_aulifants["voltage"].max())],
+            "current_mean": [float(ds_aulifants["current"].mean())],
+            "current_max": [float(ds_aulifants["current"].max())],
+            "power_mean": [float(ds_aulifants["power"].mean())],
+            "power_max": [float(ds_aulifants["power"].max())],
+            "power_factor_mean": [float(ds_aulifants["power_factor"].mean())],
+            "power_factor_max": [float(ds_aulifants["power_factor"].max())],
+            "cummulative_energy_mean": [
+                float(ds_aulifants["cummulative_energy"].mean())
+            ],
+            "cummulative_energy_max": [float(ds_aulifants["cummulative_energy"].max())],
+        }
+    )
+    summary.to_csv(snakemake.output.csv, index=False)
+    log.info(f"Wrote {snakemake.output.csv}")
 
-# netcdf
-out_path = Path(snakemake.output.nc)
-out_path.parent.mkdir(parents=True, exist_ok=True)
-ds_aulifants.to_netcdf(
-    out_path,
-    encoding={
-        v: {"zlib": True, "complevel": 4}
-        for v in [
-            "voltage",
-            "current",
-            "power",
-            "power_factor",
-            "cummulative_energy",
-            "cost",
-        ]
-    },
-)
-log.info(f"Wrote {out_path}")
+    # netcdf
+    out_path = Path(snakemake.output.nc)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    ds_aulifants.to_netcdf(
+        out_path,
+        encoding={
+            v: {"zlib": True, "complevel": 4}
+            for v in [
+                "voltage",
+                "current",
+                "power",
+                "power_factor",
+                "cummulative_energy",
+                "cost",
+            ]
+        },
+    )
+    log.info(f"Wrote {out_path}")

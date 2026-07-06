@@ -214,38 +214,41 @@ def add_metadata(ds, params):
     return ds
 
 
-# ── main ──────────────────────────────────────────────────────────────────────
-log.info("Starting UPAS NetCDF conversion")
+if __name__ == "__main__":
+    # ── main ──────────────────────────────────────────────────────────────────────
+    log.info("Starting UPAS NetCDF conversion")
 
-df = load_upas(snakemake.input.csv)
-log.info(f"{len(df)} records, {df['sensor'].nunique()} sensors")
+    df = load_upas(snakemake.input.csv)
+    log.info(f"{len(df)} records, {df['sensor'].nunique()} sensors")
 
-ds_upas = df.reset_index().infer_objects().set_index(["sensor", "datetime"]).to_xarray()
-ds_upas = add_metadata(ds_upas, snakemake.params)
+    ds_upas = (
+        df.reset_index().infer_objects().set_index(["sensor", "datetime"]).to_xarray()
+    )
+    ds_upas = add_metadata(ds_upas, snakemake.params)
 
-# summary csv
-summary = pd.DataFrame(
-    {
-        "n_records": [ds_upas.sizes["datetime"]],
-        "n_sensors": [ds_upas.sizes["sensor"]],
-        "pm25_mean": [float(ds_upas["upas_pm25_mc"].mean())],
-        "pm25_max": [float(ds_upas["upas_pm25_mc"].max())],
-        "temp_mean": [float(ds_upas["upas_atmo_temperature"].mean())],
-        "rh_mean": [float(ds_upas["upas_atmo_rh"].mean())],
-    }
-)
-summary.to_csv(snakemake.output.csv, index=False)
-log.info(f"Wrote {snakemake.output.csv}")
+    # summary csv
+    summary = pd.DataFrame(
+        {
+            "n_records": [ds_upas.sizes["datetime"]],
+            "n_sensors": [ds_upas.sizes["sensor"]],
+            "pm25_mean": [float(ds_upas["upas_pm25_mc"].mean())],
+            "pm25_max": [float(ds_upas["upas_pm25_mc"].max())],
+            "temp_mean": [float(ds_upas["upas_atmo_temperature"].mean())],
+            "rh_mean": [float(ds_upas["upas_atmo_rh"].mean())],
+        }
+    )
+    summary.to_csv(snakemake.output.csv, index=False)
+    log.info(f"Wrote {snakemake.output.csv}")
 
-# netcdf
-out_path = Path(snakemake.output.nc)
-out_path.parent.mkdir(parents=True, exist_ok=True)
-num_vars = [
-    v
-    for v in ds_upas.data_vars
-    if ds_upas[v].dtype in [np.float32, np.float64, np.int32, np.int64]
-]
-ds_upas.to_netcdf(
-    out_path, encoding={v: {"zlib": True, "complevel": 4} for v in num_vars}
-)
-log.info(f"Wrote {out_path}")
+    # netcdf
+    out_path = Path(snakemake.output.nc)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    num_vars = [
+        v
+        for v in ds_upas.data_vars
+        if ds_upas[v].dtype in [np.float32, np.float64, np.int32, np.int64]
+    ]
+    ds_upas.to_netcdf(
+        out_path, encoding={v: {"zlib": True, "complevel": 4} for v in num_vars}
+    )
+    log.info(f"Wrote {out_path}")

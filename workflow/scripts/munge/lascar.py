@@ -105,30 +105,31 @@ def add_metadata(ds, params):
     return ds
 
 
-# ── main ──────────────────────────────────────────────────────────────────────
-log.info("Starting Lascar munging")
+if __name__ == "__main__":
+    # ── main ──────────────────────────────────────────────────────────────────────
+    log.info("Starting Lascar munging")
 
-ds_lascar = process_lascar(snakemake.params)
-ds_lascar = add_metadata(ds_lascar, snakemake.params)
+    ds_lascar = process_lascar(snakemake.params)
+    ds_lascar = add_metadata(ds_lascar, snakemake.params)
 
-# summary csv
-files = get_files(snakemake.params.raw_dir, snakemake.params.file_ext)
+    # summary csv
+    files = get_files(snakemake.params.raw_dir, snakemake.params.file_ext)
 
-summary = pd.DataFrame(
-    {
-        "n_files": [len(files)],
-        "n_records": [ds_lascar.sizes["datetime"]],
-        "co_mean": [float(ds_lascar["co"].mean())],
-        "co_max": [float(ds_lascar["co"].max())],
-    }
-)
-summary.to_csv(snakemake.output.csv, index=False)
-log.info(f"Wrote {snakemake.output.csv}")
+    summary = pd.DataFrame(
+        {
+            "n_files": [len(files)],
+            "n_records": [ds_lascar.sizes["datetime"]],
+            "co_mean": [float(ds_lascar["co"].mean())],
+            "co_max": [float(ds_lascar["co"].max())],
+        }
+    )
+    summary.to_csv(snakemake.output.csv, index=False)
+    log.info(f"Wrote {snakemake.output.csv}")
 
-# netcdf
-out_path = Path(snakemake.output.nc)
-out_path.parent.mkdir(parents=True, exist_ok=True)
-ds_lascar.to_netcdf(
-    out_path, encoding={v: {"zlib": True, "complevel": 4} for v in ["co"]}
-)
-log.info(f"Wrote {out_path}")
+    # netcdf
+    out_path = Path(snakemake.output.nc)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    ds_lascar.to_netcdf(
+        out_path, encoding={v: {"zlib": True, "complevel": 4} for v in ["co"]}
+    )
+    log.info(f"Wrote {out_path}")

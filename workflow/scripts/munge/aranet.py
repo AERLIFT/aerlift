@@ -114,37 +114,38 @@ def add_metadata(ds, params):
     return ds
 
 
-# ── main ──────────────────────────────────────────────────────────────────────
-log.info("Starting Aranet4 munging")
+if __name__ == "__main__":
+    # ── main ──────────────────────────────────────────────────────────────────────
+    log.info("Starting Aranet4 munging")
 
-ds_aranet = process_aranet(snakemake.params)
-log.info(f"Processed {len(get_files(snakemake.params.raw_dir))} files")
+    ds_aranet = process_aranet(snakemake.params)
+    log.info(f"Processed {len(get_files(snakemake.params.raw_dir))} files")
 
-ds_aranet = add_metadata(ds_aranet, snakemake.params)
+    ds_aranet = add_metadata(ds_aranet, snakemake.params)
 
-# summary csv
-files = get_files(snakemake.params.raw_dir)
-summary = pd.DataFrame(
-    {
-        "n_files": [len(files)],
-        "n_records": [ds_aranet.sizes["datetime"]],
-        "co2_mean": [float(ds_aranet["co2"].mean())],
-        "co2_max": [float(ds_aranet["co2"].max())],
-        "temp_mean": [float(ds_aranet["temperature"].mean())],
-        "rh_mean": [float(ds_aranet["rh"].mean())],
-    }
-)
-summary.to_csv(snakemake.output.csv, index=False)
-log.info(f"Wrote {snakemake.output.csv}")
+    # summary csv
+    files = get_files(snakemake.params.raw_dir)
+    summary = pd.DataFrame(
+        {
+            "n_files": [len(files)],
+            "n_records": [ds_aranet.sizes["datetime"]],
+            "co2_mean": [float(ds_aranet["co2"].mean())],
+            "co2_max": [float(ds_aranet["co2"].max())],
+            "temp_mean": [float(ds_aranet["temperature"].mean())],
+            "rh_mean": [float(ds_aranet["rh"].mean())],
+        }
+    )
+    summary.to_csv(snakemake.output.csv, index=False)
+    log.info(f"Wrote {snakemake.output.csv}")
 
-# netcdf
-out_path = Path(snakemake.output.nc)
-out_path.parent.mkdir(parents=True, exist_ok=True)
-ds_aranet.to_netcdf(
-    out_path,
-    encoding={
-        v: {"zlib": True, "complevel": 4}
-        for v in ["co2", "temperature", "rh", "pressure"]
-    },
-)
-log.info(f"Wrote {out_path}")
+    # netcdf
+    out_path = Path(snakemake.output.nc)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    ds_aranet.to_netcdf(
+        out_path,
+        encoding={
+            v: {"zlib": True, "complevel": 4}
+            for v in ["co2", "temperature", "rh", "pressure"]
+        },
+    )
+    log.info(f"Wrote {out_path}")
