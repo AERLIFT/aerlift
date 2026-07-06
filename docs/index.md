@@ -18,4 +18,5 @@ and prepares merged exposure datasets for analysis.
 instruments
 pipeline
 config
+api
 ```

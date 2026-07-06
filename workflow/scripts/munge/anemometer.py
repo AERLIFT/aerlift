@@ -34,7 +34,16 @@ log = logging.getLogger(__name__)
 
 
 # ── functions ─────────────────────────────────────────────────────────────────
-def get_files(raw_dir, ext=".txt"):
+def get_files(raw_dir, ext=".txt") -> list:
+    """ Finds all anemometer files in anemometer directory.
+    Args:
+        raw_dir: path to raw data directory
+        ext: file extension to search for (default: .txt)
+    Returns:
+        files: list of file paths for each anemometer file
+    Raises:
+        No files found error if no files are found.
+    """
     path = Path(raw_dir.strip()) / "anemometer"
     files = list(path.rglob(f"*{ext}"))
     assert len(files) > 0, f"No {ext} files found in {path}"
