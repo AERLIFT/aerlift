@@ -1,6 +1,7 @@
 import logging
 import numpy as np
 import pandas as pd
+import xarray as xr
 
 from pathlib import Path
 from datetime import datetime
@@ -50,11 +51,24 @@ def get_files(raw_dir, ext=".txt") -> list:
     return files
 
 
-def parse_sensor_id(file):
+def parse_sensor_id(file) -> str:
+    """Extracts sensor ID from file name.
+    Args:
+        file: file path with sensor ID in filename
+    Returns:
+        sensor ID
+    """
     return file.stem.split("_")[1]
 
 
-def parse_datetime(df, timezone):
+def parse_datetime(df, timezone) -> pd.DatetimeIndex:
+    """Parses datetime from raw data.
+    Args:
+        df: dataframe with columns for each date/time value (year, month, day, etc.)
+        timezone: timezone to parse datetime in
+    Returns:
+        a pd.DatetimeIndex of datetime values for easy indexing of the pd.DataFrame
+    """
     df_date = df.iloc[:, 1].str.split("-", expand=True).astype(int)
     df_time = df.iloc[:, 2].str.split(":", expand=True).astype(int)
     return (
@@ -70,11 +84,21 @@ def parse_datetime(df, timezone):
         )
         .dt.tz_localize(timezone)
         .dt.tz_convert("UTC")
-        .dt.tz_localize(None)
-    )  # strip tz for netcdf compatibility
+        .dt.tz_localize(None)  # strip tz for xarray/netcdf compat issues
+    )
 
 
-def read_anemometer_file(file, skiprows, usecols, threshold, timezone):
+def read_anemometer_file(file, skiprows, usecols, threshold, timezone) -> pd.DataFrame:
+    """Reads an anemometer file and returns a pd.DataFrame.
+    Args:
+        file: file path to anemometer file
+        skiprows: number of rows to skip at the beginning of the file
+        usecols: columns to use from the file
+        threshold: flow threshold to flag active flow
+        timezone: timezone to parse datetime in
+    Returns:
+        df: time-indexed DataFrame with columns for measured and derived values
+    """
     df = pd.read_csv(file, skiprows=skiprows, header=None, index_col=0, usecols=usecols)
     df.index = parse_datetime(df, timezone)
     df = df.drop([3, 4], axis=1)
@@ -85,7 +109,13 @@ def read_anemometer_file(file, skiprows, usecols, threshold, timezone):
     return df
 
 
-def process_anemometer(params):
+def process_anemometer(params) -> xr.Dataset:
+    """Gathers anemometer files, parses & standardizes, and returns an xarray dataset.
+    Args:
+        params: snakemake params object contains directory path, skiprows, usecols, threshold, and timezone
+    Returns:
+        an xarray dataset with time-indexed values for each sensor, ready for netCDF writing
+    """
     files = get_files(params.raw_dir)
     lst_df = [
         read_anemometer_file(
@@ -101,7 +131,14 @@ def process_anemometer(params):
     return df.set_index(["sensor", "datetime"]).to_xarray()
 
 
-def add_metadata(ds, params):
+def add_metadata(ds, params) -> xr.Dataset:
+    """Adds metadata to the anemometer xarray dataset.
+    Args:
+        ds: xarray dataset to add metadata to
+        params: snakemake params object contains threshold, and timezone
+    Returns:
+        ds: xarray dataset with metadata added
+    """
     ds.attrs = {
         "campaign": "AERLIFT",
         "instrument": "anemometer",
