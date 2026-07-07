@@ -33,7 +33,6 @@ log = logging.getLogger(__name__)
 
 # ── functions ─────────────────────────────────────────────────────────────────
 def get_files(raw_dir: str, ext: str = ".csv") -> list[Path]:
-    """ """
     path = Path(raw_dir.strip()) / "aranet"
     files = list(path.glob(f"*{ext}"))
     assert len(files) > 0, f"No {ext} files found in {path}"
