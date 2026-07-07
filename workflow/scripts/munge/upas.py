@@ -3,6 +3,8 @@ from datetime import datetime
 import logging
 import pandas as pd
 import numpy as np
+import xarray as xr
+from typing import Any
 
 # ── dev shim ──────────────────────────────────────────────────────────────────
 try:
@@ -33,7 +35,7 @@ log = logging.getLogger(__name__)
 
 
 # ── functions ─────────────────────────────────────────────────────────────────
-def load_upas(input_csv):
+def load_upas(input_csv: str) -> pd.DataFrame:
     df = pd.read_csv(input_csv)
 
     # datetime
@@ -107,7 +109,7 @@ def load_upas(input_csv):
     return df2.set_index("datetime")
 
 
-def add_metadata(ds, params):
+def add_metadata(ds: xr.Dataset, params: Any) -> xr.Dataset:
     ds.attrs = {
         "campaign": "AERLIFT",
         "instrument": "UPAS",

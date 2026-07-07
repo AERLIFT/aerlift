@@ -2,6 +2,7 @@ import logging
 import numpy as np
 import pandas as pd
 import xarray as xr
+from typing import Any
 
 from pathlib import Path
 from datetime import datetime
@@ -35,7 +36,7 @@ log = logging.getLogger(__name__)
 
 
 # ── functions ─────────────────────────────────────────────────────────────────
-def get_files(raw_dir, ext=".txt") -> list:
+def get_files(raw_dir: str, ext: str = ".txt") -> list[Path]:
     """Finds all anemometer files in anemometer directory.
     Args:
         raw_dir: path to raw data directory
@@ -51,7 +52,7 @@ def get_files(raw_dir, ext=".txt") -> list:
     return files
 
 
-def parse_sensor_id(file) -> str:
+def parse_sensor_id(file: Path) -> str:
     """Extracts sensor ID from file name.
     Args:
         file: file path with sensor ID in filename
@@ -61,7 +62,7 @@ def parse_sensor_id(file) -> str:
     return file.stem.split("_")[1]
 
 
-def parse_datetime(df, timezone) -> pd.DatetimeIndex:
+def parse_datetime(df: pd.DataFrame, timezone: str) -> pd.DatetimeIndex:
     """Parses datetime from raw data.
     Args:
         df: dataframe with columns for each date/time value (year, month, day, etc.)
@@ -88,7 +89,9 @@ def parse_datetime(df, timezone) -> pd.DatetimeIndex:
     )
 
 
-def read_anemometer_file(file, skiprows, usecols, threshold, timezone) -> pd.DataFrame:
+def read_anemometer_file(
+    file: Path, skiprows: int, usecols: list[int], threshold: float, timezone: str
+) -> pd.DataFrame:
     """Reads an anemometer file and returns a pd.DataFrame.
     Args:
         file: file path to anemometer file
@@ -109,7 +112,7 @@ def read_anemometer_file(file, skiprows, usecols, threshold, timezone) -> pd.Dat
     return df
 
 
-def process_anemometer(params) -> xr.Dataset:
+def process_anemometer(params: Any) -> xr.Dataset:
     """Gathers anemometer files, parses & standardizes, and returns an xarray dataset.
     Args:
         params: snakemake params object contains directory path, skiprows, usecols, threshold, and timezone
@@ -131,7 +134,7 @@ def process_anemometer(params) -> xr.Dataset:
     return df.set_index(["sensor", "datetime"]).to_xarray()
 
 
-def add_metadata(ds, params) -> xr.Dataset:
+def add_metadata(ds: xr.Dataset, params: Any) -> xr.Dataset:
     """Adds metadata to the anemometer xarray dataset.
     Args:
         ds: xarray dataset to add metadata to

@@ -3,15 +3,19 @@ import xarray as xr
 import pandas as pd
 
 
-def apply_flag(flag_var, condition, bit):
+def apply_flag(
+    flag_var: xr.DataArray, condition: xr.DataArray, bit: int
+) -> xr.DataArray:
     return (flag_var | xr.where(condition, bit, 0)).astype(np.int16)
 
 
-def init_flag(ds, var):
+def init_flag(ds: xr.Dataset, var: str) -> xr.DataArray:
     return xr.zeros_like(ds[var], dtype=np.int16)
 
 
-def flag_summary(ds, flag_vars, flag_bits):
+def flag_summary(
+    ds: xr.Dataset, flag_vars: list[str], flag_bits: dict[int, str]
+) -> pd.DataFrame:
     rows = []
     for fv in flag_vars:
         for bit, name in flag_bits.items():
@@ -30,7 +34,7 @@ def flag_summary(ds, flag_vars, flag_bits):
     return pd.DataFrame(rows)
 
 
-def compute_flag_global(ds, flag_vars):
+def compute_flag_global(ds: xr.Dataset, flag_vars: list[str]) -> xr.DataArray:
     flag_global = xr.zeros_like(ds[flag_vars[0]], dtype=np.int16)
     for fv in flag_vars:
         flag_global = flag_global | ds[fv]

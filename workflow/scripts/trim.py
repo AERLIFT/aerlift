@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 import logging
 import numpy as np
 import xarray as xr
+from typing import Any
 
 try:
     snakemake
@@ -34,7 +35,9 @@ log = logging.getLogger(__name__)
 
 
 # ── functions ─────────────────────────────────────────────────────────────────
-def get_encoding(ds, skip_extra=None):
+def get_encoding(
+    ds: xr.Dataset, skip_extra: list[str] | None = None
+) -> dict[str, dict]:
     skip = set(ds.coords) | {
         "SampleName",
         "LogFilename",
@@ -61,7 +64,7 @@ def get_encoding(ds, skip_extra=None):
     return encoding
 
 
-def trim(ds, start, end, exclude):
+def trim(ds: xr.Dataset, start: str, end: str, exclude: list[str]) -> xr.Dataset:
     n_before = ds.sizes["datetime"]
 
     # time bounds
@@ -85,7 +88,7 @@ def trim(ds, start, end, exclude):
     return ds
 
 
-def update_metadata(ds, params):
+def update_metadata(ds: xr.Dataset, params: Any) -> xr.Dataset:
     ds.attrs["stage"] = "trimmed"
     ds.attrs["trim_start"] = params.start
     ds.attrs["trim_end"] = params.end

@@ -41,7 +41,9 @@ log = logging.getLogger(__name__)
 
 
 # ── flag logic ────────────────────────────────────────────────────────────────
-def flag_aulifants(ds, thresholds, flag_bits):
+def flag_aulifants(
+    ds: xr.Dataset, thresholds: dict[str, float], flag_bits: dict[int, str]
+) -> xr.Dataset:
     t = thresholds
 
     f = init_flag(ds, "voltage")
@@ -64,7 +66,7 @@ def flag_aulifants(ds, thresholds, flag_bits):
     return ds
 
 
-def update_metadata(ds):
+def update_metadata(ds: xr.Dataset) -> xr.Dataset:
     ds.attrs["stage"] = "flagged"
     ds.attrs["flagged"] = datetime.now(timezone.utc).isoformat()
     return ds

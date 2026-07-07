@@ -2,6 +2,8 @@ from pathlib import Path
 from datetime import datetime
 import logging
 import pandas as pd
+import xarray as xr
+from typing import Any
 
 # ── dev shim ──────────────────────────────────────────────────────────────────
 try:
@@ -30,18 +32,19 @@ log = logging.getLogger(__name__)
 
 
 # ── functions ─────────────────────────────────────────────────────────────────
-def get_files(raw_dir, ext=".csv"):
+def get_files(raw_dir: str, ext: str = ".csv") -> list[Path]:
+    """ """
     path = Path(raw_dir.strip()) / "aranet"
     files = list(path.glob(f"*{ext}"))
     assert len(files) > 0, f"No {ext} files found in {path}"
     return files
 
 
-def parse_sensor_id(file):
+def parse_sensor_id(file: Path) -> str:
     return file.stem.replace("Aranet4 ", "").split("_")[0]
 
 
-def read_aranet_file(file, timezone):
+def read_aranet_file(file: Path, timezone: str) -> pd.DataFrame:
     df = pd.read_csv(file)
     df.columns = ["datetime", "co2", "temperature", "rh", "pressure"]
     df.index = (
@@ -56,7 +59,7 @@ def read_aranet_file(file, timezone):
     return df
 
 
-def process_aranet(params):
+def process_aranet(params: Any) -> xr.Dataset:
     files = get_files(params.raw_dir)
     lst_df = [read_aranet_file(file, timezone=params.timezone) for file in files]
     df = pd.concat(lst_df).reset_index()
@@ -76,7 +79,7 @@ def process_aranet(params):
     return df.set_index(["sensor", "datetime"]).to_xarray()
 
 
-def add_metadata(ds, params):
+def add_metadata(ds: xr.Dataset, params: Any) -> xr.Dataset:
     ds.attrs = {
         "campaign": "AERLIFT",
         "instrument": "Aranet4",

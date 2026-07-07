@@ -51,7 +51,7 @@ log = logging.getLogger(__name__)
 
 
 # ── flag logic ────────────────────────────────────────────────────────────────
-def get_warmup_mask(ds, warmup_minutes):
+def get_warmup_mask(ds: xr.Dataset, warmup_minutes: int) -> xr.DataArray:
     """Flag first N minutes per sensor session as warmup"""
     warmup_td = pd.Timedelta(minutes=warmup_minutes)
     datetimes = pd.DatetimeIndex(ds.datetime.values)
@@ -64,7 +64,12 @@ def get_warmup_mask(ds, warmup_minutes):
     return mask
 
 
-def flag_hhb(ds, thresholds, flag_bits, alphasense):
+def flag_hhb(
+    ds: xr.Dataset,
+    thresholds: dict[str, float],
+    flag_bits: dict[int, str],
+    alphasense: dict[str, str],
+) -> tuple[xr.Dataset, list[str]]:
     t = thresholds
     g1 = f"{alphasense['position_1']}_algorithm1"
     g2 = f"{alphasense['position_2']}_algorithm1"
@@ -157,7 +162,7 @@ def flag_hhb(ds, thresholds, flag_bits, alphasense):
     return ds, flag_vars
 
 
-def update_metadata(ds):
+def update_metadata(ds: xr.Dataset) -> xr.Dataset:
     ds.attrs["stage"] = "flagged"
     ds.attrs["flagged"] = datetime.now(timezone.utc).isoformat()
     return ds

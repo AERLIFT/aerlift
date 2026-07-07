@@ -51,7 +51,7 @@ log = logging.getLogger(__name__)
 
 
 # ── flag logic ────────────────────────────────────────────────────────────────
-def get_zero_run_mask(ds, var, zero_run_mins):
+def get_zero_run_mask(ds: xr.Dataset, var: str, zero_run_mins: int) -> xr.DataArray:
     """Flag sustained runs of zeros exceeding zero_run_mins per sensor"""
     zero_run_td = pd.Timedelta(minutes=zero_run_mins)
     datetimes = pd.DatetimeIndex(ds.datetime.values)
@@ -85,7 +85,9 @@ def get_zero_run_mask(ds, var, zero_run_mins):
     return mask
 
 
-def flag_upas(ds, thresholds, flag_bits):
+def flag_upas(
+    ds: xr.Dataset, thresholds: dict[str, float], flag_bits: dict[int, str]
+) -> tuple[xr.Dataset, list[str]]:
     t = thresholds
 
     pm_mc_vars = ["upas_pm1_mc", "upas_pm25_mc", "upas_pm4_mc", "upas_pm10_mc"]
@@ -197,7 +199,7 @@ def flag_upas(ds, thresholds, flag_bits):
     return ds, flag_vars
 
 
-def update_metadata(ds):
+def update_metadata(ds: xr.Dataset) -> xr.Dataset:
     ds.attrs["stage"] = "flagged"
     ds.attrs["flagged"] = datetime.now(timezone.utc).isoformat()
     return ds

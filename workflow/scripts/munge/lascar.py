@@ -2,6 +2,8 @@ from pathlib import Path
 from datetime import datetime
 import logging
 import pandas as pd
+import xarray as xr
+from typing import Any
 
 # ── dev shim ──────────────────────────────────────────────────────────────────
 try:
@@ -32,18 +34,18 @@ log = logging.getLogger(__name__)
 
 
 # ── functions ─────────────────────────────────────────────────────────────────
-def get_files(raw_dir, ext):
+def get_files(raw_dir: str, ext: str) -> list[Path]:
     path = Path(raw_dir.strip()) / "lascar"
     files = list(path.glob(f"*{ext}"))
     assert len(files) > 0, f"No {ext} files found in {path}"
     return files
 
 
-def parse_sensor_id(df):
+def parse_sensor_id(df: pd.DataFrame) -> str:
     return df["Serial Number"].dropna().astype(int).astype(str).iloc[0]
 
 
-def read_lascar_file(file, timezone, usecols):
+def read_lascar_file(file: Path, timezone: str, usecols: list[int]) -> pd.DataFrame:
     df = pd.read_csv(file, usecols=usecols)
 
     sensor = parse_sensor_id(df)
@@ -62,7 +64,7 @@ def read_lascar_file(file, timezone, usecols):
     return df
 
 
-def process_lascar(params):
+def process_lascar(params: Any) -> xr.Dataset:
     files = get_files(params.raw_dir, params.file_ext)
     lst_df = [
         read_lascar_file(file, timezone=params.timezone, usecols=params.usecols)
@@ -82,7 +84,7 @@ def process_lascar(params):
     return df.set_index(["sensor", "datetime"]).to_xarray()
 
 
-def add_metadata(ds, params):
+def add_metadata(ds: xr.Dataset, params: Any) -> xr.Dataset:
     ds.attrs = {
         "campaign": "AERLIFT",
         "instrument": "Lascar",

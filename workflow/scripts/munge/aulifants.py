@@ -2,6 +2,8 @@ from pathlib import Path
 from datetime import datetime
 import logging
 import pandas as pd
+import xarray as xr
+from typing import Any
 
 # ── dev shim ──────────────────────────────────────────────────────────────────
 try:
@@ -30,26 +32,26 @@ log = logging.getLogger(__name__)
 
 
 # ── functions ─────────────────────────────────────────────────────────────────
-def get_files(raw_dir, ext=".CSV"):
+def get_files(raw_dir: str, ext: str = ".CSV") -> tuple[list[Path], Path]:
     path = Path(raw_dir.strip()) / "aulifants"
     files = [f for f in path.rglob(f"*{ext}") if f.name.upper().endswith("-D.CSV")]
     assert len(files) > 0, f"No *-D{ext} files found in {path}"
     return files, path
 
 
-def parse_sensor_id(file):
+def parse_sensor_id(file: Path) -> tuple[str, str]:
     device, date = file.parent.stem.split("-Aulifant4-")
     return device, date
 
 
-def _strip_units(series):
+def _strip_units(series: pd.Series) -> pd.Series:
     """Extract leading numeric value from strings like '112.3Volt', '  0.00Amp', '$0.00 '."""
     return pd.to_numeric(
         series.astype(str).str.replace(r"[^\d.]", "", regex=True), errors="coerce"
     )
 
 
-def read_aulifants_file(file, timezone):
+def read_aulifants_file(file: Path, timezone: str) -> pd.DataFrame:
     df = pd.read_csv(file, header=None, usecols=[0, 1, 2, 3, 4, 5, 6])
     df.columns = [
         "time",
@@ -77,7 +79,7 @@ def read_aulifants_file(file, timezone):
     return df
 
 
-def process_aulifants(params):
+def process_aulifants(params: Any) -> xr.Dataset:
     files, _ = get_files(params.raw_dir)
     lst_df = [read_aulifants_file(file, timezone=params.timezone) for file in files]
     df = pd.concat(lst_df).reset_index()
@@ -97,7 +99,7 @@ def process_aulifants(params):
     return df.set_index(["sensor", "datetime"]).to_xarray()
 
 
-def add_metadata(ds, params):
+def add_metadata(ds: xr.Dataset, params: Any) -> xr.Dataset:
     ds.attrs = {
         "campaign": "AERLIFT",
         "instrument": "Aulifants",

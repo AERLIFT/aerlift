@@ -3,6 +3,8 @@ from datetime import datetime
 import logging
 import pandas as pd
 import numpy as np
+import xarray as xr
+from typing import Any
 
 # ── dev shim ──────────────────────────────────────────────────────────────────
 try:
@@ -39,7 +41,7 @@ log = logging.getLogger(__name__)
 
 
 # ── functions ─────────────────────────────────────────────────────────────────
-def load_hhb(input_csv, alphasense):
+def load_hhb(input_csv: str, alphasense: dict[str, str | None]) -> pd.DataFrame:
     df = pd.read_csv(input_csv)
 
     # datetime
@@ -73,7 +75,7 @@ def load_hhb(input_csv, alphasense):
     return df
 
 
-def add_metadata(ds, params):
+def add_metadata(ds: xr.Dataset, params: Any) -> xr.Dataset:
     ds.attrs = {
         "campaign": "AERLIFT",
         "instrument": "HHB",

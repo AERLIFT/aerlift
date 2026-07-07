@@ -38,7 +38,9 @@ log = logging.getLogger(__name__)
 
 
 # ── flag logic ────────────────────────────────────────────────────────────────
-def flag_anemometer(ds, thresholds, flag_bits):
+def flag_anemometer(
+    ds: xr.Dataset, thresholds: dict[str, float], flag_bits: dict[int, str]
+) -> xr.Dataset:
     t = thresholds
 
     # flag_air_flow
@@ -66,7 +68,7 @@ def flag_anemometer(ds, thresholds, flag_bits):
     return ds
 
 
-def update_metadata(ds):
+def update_metadata(ds: xr.Dataset) -> xr.Dataset:
     ds.attrs["stage"] = "flagged"
     ds.attrs["flagged"] = datetime.now(timezone.utc).isoformat()
     return ds
