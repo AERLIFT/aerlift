@@ -4,7 +4,7 @@ import sys
 sys.path.insert(0, os.path.abspath("../workflow/scripts"))
 
 project = "AERLIFT"
-copyright = "2026, Mark Campmier"
+copyright = "2026, Mark Campmier"  # pylint: disable=redefined-builtin
 author = "Mark Campmier, PhD"
 
 extensions = [
