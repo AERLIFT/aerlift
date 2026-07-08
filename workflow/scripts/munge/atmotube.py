@@ -33,6 +33,15 @@ log = logging.getLogger(__name__)
 
 # ── functions ─────────────────────────────────────────────────────────────────
 def get_files(raw_dir: str, ext: str = ".csv") -> list[Path]:
+    """Finds all atmotube files in atmotube directory.
+    Args:
+        raw_dir: path to raw data directory
+        ext: file extension to search for (default: .csv)
+    Returns:
+        files: list of file paths for each atmotube file
+    Raises:
+        No files found error if no files are found.
+    """
     path = Path(raw_dir.strip()) / "atmotube"
     files = list(path.glob(f"*{ext}"))
     assert len(files) > 0, f"No {ext} files found in {path}"
@@ -40,10 +49,23 @@ def get_files(raw_dir: str, ext: str = ".csv") -> list[Path]:
 
 
 def parse_sensor_id(file: Path) -> str:
+    """Extracts sensor ID from atmotube file name.
+    Args:
+        file: file path with sensor ID in filename
+    Returns:
+        sensor ID
+    """
     return file.stem.split("_")[0]
 
 
 def read_atmotube_file(file: Path, timezone: str) -> pd.DataFrame:
+    """Reads an atmotube file and returns a pd.DataFrame.
+    Args:
+        file: file path to atmotube file
+        timezone: timezone to parse datetime in
+    Returns:
+        df: time-indexed DataFrame with columns for each variable
+    """
     df = pd.read_csv(file)
     df.columns = [
         "datetime",
@@ -80,6 +102,12 @@ def read_atmotube_file(file: Path, timezone: str) -> pd.DataFrame:
 
 
 def process_atmotube(params: Any) -> xr.Dataset:
+    """Gathers atmotube files, parses & standardizes, and returns an xarray Dataset.
+    Args:
+        params: snakemake params object contains directory path and timezone
+    Returns:
+        xarray Dataset with time-indexed values for each sensor, ready for netCDF writing
+    """
     files = get_files(params.raw_dir)
     lst_df = [read_atmotube_file(file, timezone=params.timezone) for file in files]
     df = pd.concat(lst_df).reset_index()
@@ -100,6 +128,13 @@ def process_atmotube(params: Any) -> xr.Dataset:
 
 
 def add_metadata(ds: xr.Dataset, params: Any) -> xr.Dataset:
+    """Adds metadata to the atmotube xarray dataset.
+    Args:
+        ds: xarray dataset to add metadata to
+        params: snakemake params object contains timezone
+    Returns:
+        ds: xarray dataset with metadata added
+    """
     ds.attrs = {
         "campaign": "AERLIFT",
         "instrument": "Atmotube",
