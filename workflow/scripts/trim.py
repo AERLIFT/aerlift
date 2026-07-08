@@ -38,6 +38,13 @@ log = logging.getLogger(__name__)
 def get_encoding(
     ds: xr.Dataset, skip_extra: list[str] | None = None
 ) -> dict[str, dict]:
+    """Get encoding dict for netCDF file. Skips extra variables from lab samples (e.g., UPAS filters)
+    Args:
+        ds: xarray Dataset to trim by time-index
+        skip_extra: list of extra variables to skip
+    Returns:
+        encoding: dict of variables to time-index encode
+    """
     skip = set(ds.coords) | {
         "SampleName",
         "LogFilename",
@@ -65,6 +72,15 @@ def get_encoding(
 
 
 def trim(ds: xr.Dataset, start: str, end: str, exclude: list[str]) -> xr.Dataset:
+    """Trim operation to cut out unwanted data outside time bounds.
+    Args:
+        ds: xarray dataset to trim
+        start: start date of time bounds
+        end: end date of time bounds
+        exclude: list of sensors/geographies to exclude from dataset
+    Returns:
+        ds: xarray dataset with time bounds and sensors/geography trimmed
+    """
     n_before = ds.sizes["datetime"]
 
     # time bounds
@@ -89,6 +105,13 @@ def trim(ds: xr.Dataset, start: str, end: str, exclude: list[str]) -> xr.Dataset
 
 
 def update_metadata(ds: xr.Dataset, params: Any) -> xr.Dataset:
+    """Update metadata with trim parameters.
+    Args:
+        ds: xarray dataset to update metadata on
+        params: snakemake params object including start, end, and exclude
+    Returns:
+        ds: xarray dataset with updated metadata
+    """
     ds.attrs["stage"] = "trimmed"
     ds.attrs["trim_start"] = params.start
     ds.attrs["trim_end"] = params.end
