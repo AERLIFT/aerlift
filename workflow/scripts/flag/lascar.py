@@ -44,6 +44,14 @@ log = logging.getLogger(__name__)
 def flag_lascar(
     ds: xr.Dataset, thresholds: dict[str, float], flag_bits: dict[int, str]
 ) -> xr.Dataset:
+    """Flag lascar data
+    Args:
+        ds: xarray dataset with lascar data
+        thresholds: dictionary of thresholds for each flag
+        flag_bits: dictionary of flag bit descriptions
+    Returns:
+        ds: xarray dataset with lascar flags added
+    """
     t = thresholds
 
     # flag_co
@@ -69,6 +77,12 @@ def flag_lascar(
 
 
 def update_metadata(ds: xr.Dataset) -> xr.Dataset:
+    """Update metadata for flagged lascar dataset
+    Args:
+        ds: xarray dataset with lascar flags added
+    Returns:
+        ds: xarray dataset with updated metadata
+    """
     ds.attrs["stage"] = "flagged"
     ds.attrs["flagged"] = datetime.now(timezone.utc).isoformat()
     return ds

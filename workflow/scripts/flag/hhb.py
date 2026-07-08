@@ -52,7 +52,13 @@ log = logging.getLogger(__name__)
 
 # ── flag logic ────────────────────────────────────────────────────────────────
 def get_warmup_mask(ds: xr.Dataset, warmup_minutes: int) -> xr.DataArray:
-    """Flag first N minutes per sensor session as warmup"""
+    """Flag first N minutes per sensor session as warmup
+    Args:
+        ds: xarray dataset with HHB data
+        warmup_minutes: number of minutes to flag as warmup
+    Returns:
+        mask: xarray DataArray of warmup flags
+    """
     warmup_td = pd.Timedelta(minutes=warmup_minutes)
     datetimes = pd.DatetimeIndex(ds.datetime.values)
     mask = xr.zeros_like(ds["sen_pm25_raw"], dtype=bool)
@@ -70,6 +76,16 @@ def flag_hhb(
     flag_bits: dict[int, str],
     alphasense: dict[str, str],
 ) -> tuple[xr.Dataset, list[str]]:
+    """Flag HHB data
+    Args:
+        ds: xarray dataset with HHB data
+        thresholds: dictionary of thresholds for each flag
+        flag_bits: dictionary of flag bit descriptions
+        alphasense: dictionary of alphaSense position names (must specify both)
+    Returns:
+        ds: xarray dataset with HHB flags added
+        flag_vars: list of flag variable names
+    """
     t = thresholds
     g1 = f"{alphasense['position_1']}_algorithm1"
     g2 = f"{alphasense['position_2']}_algorithm1"
@@ -163,6 +179,12 @@ def flag_hhb(
 
 
 def update_metadata(ds: xr.Dataset) -> xr.Dataset:
+    """Update metadata for flagged HHB dataset
+    Args:
+        ds: xarray dataset with HHB flags added
+    Returns:
+        ds: xarray dataset with updated metadata
+    """
     ds.attrs["stage"] = "flagged"
     ds.attrs["flagged"] = datetime.now(timezone.utc).isoformat()
     return ds

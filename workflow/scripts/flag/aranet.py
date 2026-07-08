@@ -50,6 +50,14 @@ log = logging.getLogger(__name__)
 def flag_aranet(
     ds: xr.Dataset, thresholds: dict[str, float], flag_bits: dict[int, str]
 ) -> xr.Dataset:
+    """Flag Aranet4 data
+    Args:
+        ds: xarray dataset with Aranet4 data
+        thresholds: dictionary of thresholds for each flag
+        flag_bits: dictionary of flag bit descriptions
+    Returns:
+        ds: xarray dataset with Aranet4 flags added
+    """
     t = thresholds
 
     # flag_co2
@@ -106,6 +114,12 @@ def flag_aranet(
 
 
 def update_metadata(ds: xr.Dataset) -> xr.Dataset:
+    """Update metadata for flagged Aranet4 dataset
+    Args:
+        ds: xarray dataset with Aranet4 flags added
+    Returns:
+        ds: xarray dataset with updated metadata
+    """
     ds.attrs["stage"] = "flagged"
     ds.attrs["flagged"] = datetime.now(timezone.utc).isoformat()
     return ds

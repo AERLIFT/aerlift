@@ -52,7 +52,14 @@ log = logging.getLogger(__name__)
 
 # ── flag logic ────────────────────────────────────────────────────────────────
 def get_zero_run_mask(ds: xr.Dataset, var: str, zero_run_mins: int) -> xr.DataArray:
-    """Flag sustained runs of zeros exceeding zero_run_mins per sensor"""
+    """Flag sustained runs of zeros exceeding zero_run_mins per sensor
+    Args:
+        ds: xarray dataset with UPAS data
+        var: variable to check for zero runs
+        zero_run_mins: number of minutes to flag as zero run
+    Returns:
+        mask: xarray DataArray of zero run flags
+    """
     zero_run_td = pd.Timedelta(minutes=zero_run_mins)
     datetimes = pd.DatetimeIndex(ds.datetime.values)
     mask = xr.zeros_like(ds[var], dtype=bool)
@@ -88,6 +95,16 @@ def get_zero_run_mask(ds: xr.Dataset, var: str, zero_run_mins: int) -> xr.DataAr
 def flag_upas(
     ds: xr.Dataset, thresholds: dict[str, float], flag_bits: dict[int, str]
 ) -> tuple[xr.Dataset, list[str]]:
+    """Flag UPAS data
+    Args:
+        ds: xarray dataset with UPAS data
+        thresholds: dictionary of thresholds for each flag
+        flag_bits: dictionary of flag bit descriptions
+    Returns:
+        ds: xarray dataset with UPAS flags added
+        flag_vars: list of flag variable names
+    """
+
     t = thresholds
 
     pm_mc_vars = ["upas_pm1_mc", "upas_pm25_mc", "upas_pm4_mc", "upas_pm10_mc"]
@@ -200,6 +217,12 @@ def flag_upas(
 
 
 def update_metadata(ds: xr.Dataset) -> xr.Dataset:
+    """Update metadata for flagged UPAS dataset
+    Args:
+        ds: xarray dataset with UPAS flags added
+    Returns:
+        ds: xarray dataset with updated metadata
+    """
     ds.attrs["stage"] = "flagged"
     ds.attrs["flagged"] = datetime.now(timezone.utc).isoformat()
     return ds

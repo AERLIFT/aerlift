@@ -44,6 +44,14 @@ log = logging.getLogger(__name__)
 def flag_atmotube(
     ds: xr.Dataset, thresholds: dict[str, float], flag_bits: dict[int, str]
 ) -> xr.Dataset:
+    """Flag AtmoTube data
+    Args:
+        ds: xarray dataset with AtmoTube data
+        thresholds: dictionary of thresholds for each flag
+        flag_bits: dictionary of flag bit descriptions
+    Returns:
+        ds: xarray dataset with AtmoTube flags added
+    """
     t = thresholds
 
     # flag_pm — any PM channel below zero
@@ -81,6 +89,12 @@ def flag_atmotube(
 
 
 def update_metadata(ds: xr.Dataset) -> xr.Dataset:
+    """Update metadata for flagged AtmoTube dataset
+    Args:
+        ds: xarray dataset with AtmoTube flags added
+    Returns:
+        ds: xarray dataset with updated metadata
+    """
     ds.attrs["stage"] = "flagged"
     ds.attrs["flagged"] = datetime.now(timezone.utc).isoformat()
     return ds

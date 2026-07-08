@@ -44,6 +44,14 @@ log = logging.getLogger(__name__)
 def flag_aulifants(
     ds: xr.Dataset, thresholds: dict[str, float], flag_bits: dict[int, str]
 ) -> xr.Dataset:
+    """Flag Aulifants data
+    Args:
+        ds: xarray dataset with Aulifants data
+        thresholds: dictionary of thresholds for each flag
+        flag_bits: dictionary of flag bit descriptions
+    Returns:
+        ds: xarray dataset with Aulifants flags added
+    """
     t = thresholds
 
     f = init_flag(ds, "voltage")
@@ -67,6 +75,12 @@ def flag_aulifants(
 
 
 def update_metadata(ds: xr.Dataset) -> xr.Dataset:
+    """Update metadata for flagged Aulifants dataset
+    Args:
+        ds: xarray dataset with Aulifants flags added
+    Returns:
+        ds: xarray dataset with updated metadata
+    """
     ds.attrs["stage"] = "flagged"
     ds.attrs["flagged"] = datetime.now(timezone.utc).isoformat()
     return ds
