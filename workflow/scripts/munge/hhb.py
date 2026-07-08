@@ -42,6 +42,13 @@ log = logging.getLogger(__name__)
 
 # ── functions ─────────────────────────────────────────────────────────────────
 def load_hhb(input_csv: str, alphasense: dict[str, str | None]) -> pd.DataFrame:
+    """Loads HHB data from CSV file that has been preprocessed by the AST-R script.
+    Args:
+        input_csv: path to CSV file
+        alphasense: dictionary of Alphasense positions if additional sensors are present, must verify the variables
+    Returns:
+        df: time-indexed DataFrame with columns for each variable
+    """
     df = pd.read_csv(input_csv)
 
     # datetime
@@ -76,6 +83,13 @@ def load_hhb(input_csv: str, alphasense: dict[str, str | None]) -> pd.DataFrame:
 
 
 def add_metadata(ds: xr.Dataset, params: Any) -> xr.Dataset:
+    """Adds metadata to the HHB xarray dataset.
+    Args:
+        ds: xarray dataset to add metadata to
+        params: snakemake params object contains timezone
+    Returns:
+        ds: xarray dataset with metadata added
+    """
     ds.attrs = {
         "campaign": "AERLIFT",
         "instrument": "HHB",
