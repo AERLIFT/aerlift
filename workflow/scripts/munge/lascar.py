@@ -35,6 +35,15 @@ log = logging.getLogger(__name__)
 
 # ── functions ─────────────────────────────────────────────────────────────────
 def get_files(raw_dir: str, ext: str) -> list[Path]:
+    """Finds all lascar files in lascar directory.
+    Args:
+        raw_dir: path to raw data directory
+        ext: file extension to search for (default: .txt)
+    Returns:
+        files: list of file paths for each lascar file
+    Raises:
+        No files found error if no files are found.
+    """
     path = Path(raw_dir.strip()) / "lascar"
     files = list(path.glob(f"*{ext}"))
     assert len(files) > 0, f"No {ext} files found in {path}"
@@ -42,10 +51,24 @@ def get_files(raw_dir: str, ext: str) -> list[Path]:
 
 
 def parse_sensor_id(df: pd.DataFrame) -> str:
+    """Extracts sensor ID from lascar file name.
+    Args:
+        df: DataFrame with column for serial number
+    Returns:
+        serial number identifier of sensor as a string
+    """
     return df["Serial Number"].dropna().astype(int).astype(str).iloc[0]
 
 
 def read_lascar_file(file: Path, timezone: str, usecols: list[int]) -> pd.DataFrame:
+    """Reads a lascar file and returns a pd.DataFrame.
+    Args:
+        file: file path to lascar file
+        timezone: timezone to parse datetime in
+        usecols: columns to use from the file
+    Returns:
+        df: time-indexed DataFrame with columns for each variable
+    """
     df = pd.read_csv(file, usecols=usecols)
 
     sensor = parse_sensor_id(df)
@@ -65,6 +88,12 @@ def read_lascar_file(file: Path, timezone: str, usecols: list[int]) -> pd.DataFr
 
 
 def process_lascar(params: Any) -> xr.Dataset:
+    """Processes lascar files, parses & standardizes, and returns an xarray Dataset.
+    Args:
+        params: snakemake params object contains directory path, timezone, and usecols
+    Returns:
+        xarray Dataset with time-indexed values for each sensor, ready for netCDF writing
+    """
     files = get_files(params.raw_dir, params.file_ext)
     lst_df = [
         read_lascar_file(file, timezone=params.timezone, usecols=params.usecols)
@@ -85,6 +114,13 @@ def process_lascar(params: Any) -> xr.Dataset:
 
 
 def add_metadata(ds: xr.Dataset, params: Any) -> xr.Dataset:
+    """Adds metadata to the lascar xarray dataset.
+    Args:
+        ds: xarray dataset to add metadata to
+        params: snakemake params object contains timezone
+    Returns:
+        ds: xarray dataset with metadata added
+    """
     ds.attrs = {
         "campaign": "AERLIFT",
         "instrument": "Lascar",
