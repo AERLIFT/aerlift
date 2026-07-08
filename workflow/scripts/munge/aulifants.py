@@ -33,6 +33,16 @@ log = logging.getLogger(__name__)
 
 # ── functions ─────────────────────────────────────────────────────────────────
 def get_files(raw_dir: str, ext: str = ".CSV") -> tuple[list[Path], Path]:
+    """Recursively finds all aulifants files in aulifants directory. Folders/sub-directory contain sensor IDs.
+    Args:
+        raw_dir: path to raw data directory
+        ext: file extension to search for (default: .CSV)
+    Returns:
+        files: list of file paths for each aulifants file (includes sub-directory structure)
+        path: path to raw data directory
+    Raises:
+        No files found error if no files are found.
+    """
     path = Path(raw_dir.strip()) / "aulifants"
     files = [f for f in path.rglob(f"*{ext}") if f.name.upper().endswith("-D.CSV")]
     assert len(files) > 0, f"No *-D{ext} files found in {path}"
@@ -40,18 +50,37 @@ def get_files(raw_dir: str, ext: str = ".CSV") -> tuple[list[Path], Path]:
 
 
 def parse_sensor_id(file: Path) -> tuple[str, str]:
+    """Extracts sensor ID from file name.
+    Args:
+        file: file path with sensor ID in filename
+    Returns:
+        device: sensor ID
+        date: date on a day of measurement basis
+    """
     device, date = file.parent.stem.split("-Aulifant4-")
     return device, date
 
 
 def _strip_units(series: pd.Series) -> pd.Series:
-    """Extract leading numeric value from strings like '112.3Volt', '  0.00Amp', '$0.00 '."""
+    """Extract leading numeric value from strings like '112.3Volt', '  0.00Amp', '$0.00 ' for vectorized performance.
+    Args:
+        series: pandas Series with strings to strip units from in a column-wise fashion
+    Returns:
+        pandas Series with stripped units converted to numeric data (float64)
+    """
     return pd.to_numeric(
         series.astype(str).str.replace(r"[^\d.]", "", regex=True), errors="coerce"
     )
 
 
 def read_aulifants_file(file: Path, timezone: str) -> pd.DataFrame:
+    """Reads an aulifants file and returns a pd.DataFrame.
+    Args:
+        file: file path to aulifants file
+        timezone: timezone to parse datetime in
+    Returns:
+        df: time-indexed DataFrame with columns for each variable
+    """
     df = pd.read_csv(file, header=None, usecols=[0, 1, 2, 3, 4, 5, 6])
     df.columns = [
         "time",
@@ -80,6 +109,12 @@ def read_aulifants_file(file: Path, timezone: str) -> pd.DataFrame:
 
 
 def process_aulifants(params: Any) -> xr.Dataset:
+    """Gathers aulifants files, parses & standardizes, and returns an xarray Dataset.
+    Args:
+        params: snakemake params object contains directory path and timezone
+    Returns:
+        xarray Dataset with time-indexed values for each sensor, ready for netCDF writing
+    """
     files, _ = get_files(params.raw_dir)
     lst_df = [read_aulifants_file(file, timezone=params.timezone) for file in files]
     df = pd.concat(lst_df).reset_index()
@@ -100,6 +135,13 @@ def process_aulifants(params: Any) -> xr.Dataset:
 
 
 def add_metadata(ds: xr.Dataset, params: Any) -> xr.Dataset:
+    """Adds metadata to the aulifants xarray dataset.
+    Args:
+        ds: xarray dataset to add metadata to
+        params: snakemake params object contains timezone
+    Returns:
+        ds: xarray dataset with metadata added
+    """
     ds.attrs = {
         "campaign": "AERLIFT",
         "instrument": "Aulifants",
