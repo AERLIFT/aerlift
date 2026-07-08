@@ -33,6 +33,15 @@ log = logging.getLogger(__name__)
 
 # ── functions ─────────────────────────────────────────────────────────────────
 def get_files(raw_dir: str, ext: str = ".csv") -> list[Path]:
+    """Finds all aranet files in aranet directory.
+    Args:
+        raw_dir: path to raw data directory
+        ext: file extension to search for (default: .csv)
+    Returns:
+        files: list of file paths for each aranet file
+    Raises:
+        No files found error if no files are found.
+    """
     path = Path(raw_dir.strip()) / "aranet"
     files = list(path.glob(f"*{ext}"))
     assert len(files) > 0, f"No {ext} files found in {path}"
@@ -40,10 +49,23 @@ def get_files(raw_dir: str, ext: str = ".csv") -> list[Path]:
 
 
 def parse_sensor_id(file: Path) -> str:
+    """Extracts sensor ID from aranet file name.
+    Args:
+        file: file path with sensor ID in filename
+    Returns:
+        sensor ID
+    """
     return file.stem.replace("Aranet4 ", "").split("_")[0]
 
 
 def read_aranet_file(file: Path, timezone: str) -> pd.DataFrame:
+    """Reads an aranet file and returns a pd.DataFrame.
+    Args:
+        file: file path to aranet file
+        timezone: timezone to parse datetime in
+    Returns:
+        df: time-indexed DataFrame with columns for each variable
+    """
     df = pd.read_csv(file)
     df.columns = ["datetime", "co2", "temperature", "rh", "pressure"]
     df.index = (
@@ -59,6 +81,12 @@ def read_aranet_file(file: Path, timezone: str) -> pd.DataFrame:
 
 
 def process_aranet(params: Any) -> xr.Dataset:
+    """Gathers aranet files, parses & standardizes, and returns an xarray Dataset.
+    Args:
+        params: snakemake params object contains directory path and timezone
+    Returns:
+        an xarray Dataset with time-indexed values for each sensor, ready for netCDF writing
+    """
     files = get_files(params.raw_dir)
     lst_df = [read_aranet_file(file, timezone=params.timezone) for file in files]
     df = pd.concat(lst_df).reset_index()
@@ -79,6 +107,13 @@ def process_aranet(params: Any) -> xr.Dataset:
 
 
 def add_metadata(ds: xr.Dataset, params: Any) -> xr.Dataset:
+    """Adds metadata to the aranet xarray dataset.
+    Args:
+        ds: xarray dataset to add metadata to
+        params: snakemake params object contains timezone
+    Returns:
+        ds: xarray dataset with metadata added
+    """
     ds.attrs = {
         "campaign": "AERLIFT",
         "instrument": "Aranet4",
