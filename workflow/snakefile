@@ -7,6 +7,7 @@ from pathlib import Path
 include: "rules/munge.smk"
 include: "rules/trim.smk"
 include: "rules/flag.smk"
+include: "rules/merge.smk"
 
 
 rule all:
@@ -35,3 +36,5 @@ rule all:
         Path(config["flagged_dir"]) / "upas.nc",
         Path(config["flagged_dir"]) / "atmotube.nc",
         Path(config["flagged_dir"]) / "aulifants.nc",
+        # ── merge ─────────────────────────────────────────────────────────────
+        Path(config["merged_dir"]) / "merge.nc"
