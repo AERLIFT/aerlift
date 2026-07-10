@@ -4,6 +4,8 @@ raw_dir:     '/aerlift/data/0_synthetic'
 munged_dir:  '/aerlift/data/1_munged_synth'
 trimmed_dir: '/aerlift/data/2_trimmed_synth'
 flagged_dir: '/aerlift/data/3_flagged_synth'
+merged_dir:  '/aerlift/data/4_merged_synth'
+network_dir: '/aerlift/data/5_network_synth'
 results_dir: 'results'
 log_dir:     'logs'
 
@@ -119,6 +121,10 @@ exclude:
   upas:       []
   atmotube:   []
   aulifants:  []
+
+#%% network / aggregation criteria
+network:
+  completeness: 0.75    # min fraction of expected native samples per aggregation bin
 
 #%% flag criteria
 flag:

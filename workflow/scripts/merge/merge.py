@@ -12,14 +12,16 @@ except NameError:
 
     class snakemake:
         class input:
+            # order-independent: each file is keyed to its metadata column by
+            # filename stem (e.g. anemometer.nc → anemometer_sensor_id)
             nc_list = [
                 "/Users/markcampmier/Library/Mobile Documents/com~apple~CloudDocs/aerlift/data/3_flagged_synth/anemometer.nc",
                 "/Users/markcampmier/Library/Mobile Documents/com~apple~CloudDocs/aerlift/data/3_flagged_synth/aranet.nc",
+                "/Users/markcampmier/Library/Mobile Documents/com~apple~CloudDocs/aerlift/data/3_flagged_synth/lascar.nc",
+                "/Users/markcampmier/Library/Mobile Documents/com~apple~CloudDocs/aerlift/data/3_flagged_synth/hhb.nc",
+                "/Users/markcampmier/Library/Mobile Documents/com~apple~CloudDocs/aerlift/data/3_flagged_synth/upas.nc",
                 "/Users/markcampmier/Library/Mobile Documents/com~apple~CloudDocs/aerlift/data/3_flagged_synth/atmotube.nc",
                 "/Users/markcampmier/Library/Mobile Documents/com~apple~CloudDocs/aerlift/data/3_flagged_synth/aulifants.nc",
-                "/Users/markcampmier/Library/Mobile Documents/com~apple~CloudDocs/aerlift/data/3_flagged_synth/hhb.nc",
-                "/Users/markcampmier/Library/Mobile Documents/com~apple~CloudDocs/aerlift/data/3_flagged_synth/lascar.nc",
-                "/Users/markcampmier/Library/Mobile Documents/com~apple~CloudDocs/aerlift/data/3_flagged_synth/upas.nc",
             ]
 
             df_metadata = (
@@ -88,23 +90,49 @@ def update_metadata(ds: xr.Dataset, sensor_list: list) -> xr.Dataset:
     return ds
 
 
-def merge_datasets(
-    list_ds: list[xr.Dataset], df: pd.DataFrame, sensor_list: list
-) -> xr.Dataset:
-    """Merges a list of flagged datasets into a single dataset.
+def map_datasets_to_columns(
+    nc_paths: list[str], sensor_columns: list[str]
+) -> dict[str, xr.Dataset]:
+    """Map each flagged NetCDF to its metadata sensor-id column by filename stem.
+
+    Keying on the file stem (e.g. ``anemometer.nc`` → ``anemometer_sensor_id``)
+    ties every dataset to its sensor by identity, so the merge no longer depends
+    on the order of ``nc_paths`` or of the metadata columns lining up.
     Args:
-        list_ds: list of xarray datasets to merge
+        nc_paths: paths to the flagged per-sensor NetCDF files
+        sensor_columns: metadata columns of the form ``<sensor>_sensor_id``
+    Returns:
+        mapping of sensor-id column name → opened dataset
+    Raises:
+        KeyError: if a file's derived column is absent from the metadata
+    """
+    columns = set(sensor_columns)
+    datasets = {}
+    for nc in nc_paths:
+        sensor = Path(nc).stem
+        column = f"{sensor}_sensor_id"
+        if column not in columns:
+            raise KeyError(
+                f"{nc}: derived column '{column}' not in metadata {sorted(columns)}"
+            )
+        datasets[column] = xr.open_dataset(nc)
+    return datasets
+
+
+def merge_datasets(datasets: dict[str, xr.Dataset], df: pd.DataFrame) -> xr.Dataset:
+    """Merges flagged datasets, each keyed to its metadata sensor-id column.
+    Args:
+        datasets: mapping of sensor-id column name → flagged dataset
         df: pandas dataframe with metadata - household_id and sensor_id columns for each sensor at the household
-        sensor_list: list of sensor/instrument names
     Returns:
         ds: merged xarray dataset
     """
     prepared = [
         rename_vars(add_household_id(ds, df, sensor_name), sensor_name)
-        for sensor_name, ds in zip(sensor_list, list_ds)
+        for sensor_name, ds in datasets.items()
     ]
     ds = xr.merge(prepared, join="outer", combine_attrs="drop_conflicts")
-    ds = update_metadata(ds, sensor_list)
+    ds = update_metadata(ds, list(datasets.keys()))
     return ds
 
 
@@ -114,15 +142,15 @@ if __name__ == "__main__":
 
     # load metadata
     df = pd.read_csv(Path(snakemake.input.df_metadata))
-    list_sensors = df.filter(regex=r"[a-z]*_sensor_id").columns.tolist()
+    sensor_columns = df.filter(regex=r"[a-z]*_sensor_id").columns.tolist()
     log.info(f"Loaded {snakemake.input.df_metadata}")
 
     # netcdf
     out_path = Path(snakemake.output.nc)
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    ds_merged = merge_datasets(
-        [xr.open_dataset(nc) for nc in snakemake.input.nc_list], df, list_sensors
-    )
+    datasets = map_datasets_to_columns(snakemake.input.nc_list, sensor_columns)
+    log.info(f"Matched {len(datasets)} datasets to metadata columns: {list(datasets)}")
+    ds_merged = merge_datasets(datasets, df)
 
     num_vars = [
         v for v in ds_merged.data_vars if np.issubdtype(ds_merged[v].dtype, np.number)
