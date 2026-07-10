@@ -1,10 +1,10 @@
 # Pipeline
 
-The pipeline is implemented in Snakemake (`workflow/snakefile`) and currently
-covers three stages. Merge and network stages are planned.
+The pipeline is implemented in Snakemake (`workflow/snakefile`) and covers
+five stages.
 
 ```
-0_raw → 1_munged → 2_trimmed → 3_flagged
+0_raw → 1_munged → 2_trimmed → 3_flagged → 4_merged → 5_network
 ```
 
 All intermediate and final outputs are NetCDF4 files compliant with the
@@ -101,17 +101,47 @@ deployment (default 5 minutes) to exclude electrochemical sensor warm-up.
 
 ---
 
-## Planned Stages
+## Stage 4 — Merge (`merge.smk`)
 
-### Stage 4 — Merge
+**Input:** `3_flagged/{instrument}.nc` (all instruments) + `campaign_metadata.csv`
+**Output:** `4_merged/merge.nc`
 
-Join all flagged instruments into a single `merged.nc` file indexed by
-`(household, datetime)`, preserving each instrument's native time resolution.
+`workflow/scripts/merge/merge.py` joins all flagged per-instrument datasets into
+a single NetCDF indexed by `(household_id, datetime)`.
 
-### Stage 5 — Network
+Key steps:
 
-Resample `merged.nc` to minute, hour, and integrated totals, excluding flagged
-records. Report mean, standard deviation, and N per variable.
+1. Reads `campaign_metadata.csv` to build a `{sensor}_sensor_id → household_id` lookup
+2. Maps each flagged NetCDF to its metadata column by filename stem (order-independent)
+3. Swaps the `sensor` dimension to `household_id` for each dataset
+4. Renames all variables to `{instrument}_{var}` to avoid collisions across instruments (e.g. multiple instruments measuring `temperature`)
+5. Outer-joins all datasets on `(household_id, datetime)`, preserving each instrument's native time resolution
+6. Writes compressed NetCDF4 with `stage = "merged"` global attribute
+
+---
+
+## Stage 5 — Network (`network.smk`)
+
+**Input:** `4_merged/merge.nc`
+**Output:** `5_network/network_{period}.nc`
+
+`workflow/scripts/network/network.py` aggregates the merged dataset to a fixed
+time period, gated by a completeness threshold. The rule is parameterized by
+`period` wildcard — valid values are `5min`, `1hour`, `1day`, and `campaign`.
+
+| Period | Pandas frequency |
+|---|---|
+| `5min` | `5min` |
+| `1hour` | `1h` |
+| `1day` | `1D` |
+| `campaign` | campaign-integrated (single value per household) |
+
+**Processing steps:**
+
+1. **Select measurement variables** — numeric non-flag variables are retained; `_flag_` variables are used then discarded
+2. **Apply flags** — per-variable flag (or `flag_global` fallback) masks bad records to NaN; any set bit is treated as bad
+3. **Aggregate with completeness gating** — each bin is set to NaN if the fraction of non-null samples falls below `network.completeness` (default 0.75); for the `campaign` period, completeness is computed over the full campaign span
+4. **Write output** — compressed NetCDF4 with `stage = "network"`, `network_period`, `completeness_threshold`, and per-variable `native_interval_s` attributes
 
 ---
 

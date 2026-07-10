@@ -18,6 +18,8 @@ raw_dir:     '/aerlift/data/0_raw'
 munged_dir:  '/aerlift/data/1_munged'
 trimmed_dir: '/aerlift/data/2_trimmed'
 flagged_dir: '/aerlift/data/3_flagged'
+merged_dir:  '/aerlift/data/4_merged'
+network_dir: '/aerlift/data/5_network'
 results_dir: 'results'
 log_dir:     'logs'
 ```
@@ -119,6 +121,21 @@ exclude:
 
 Sensor IDs listed here are dropped during the trim stage and do not appear
 in any downstream output.
+
+---
+
+## Network / Aggregation
+
+```yaml
+network:
+  completeness: 0.75    # min fraction of expected native samples per aggregation bin
+```
+
+`completeness` gates every aggregation bin: if fewer than this fraction of
+expected samples are non-null (after flag masking), the bin is set to NaN.
+Applies to all period tokens (`5min`, `1hour`, `1day`, `campaign`). For the
+`campaign` period, expected samples are computed over the full campaign span
+rather than a fixed bin width.
 
 ---
 
