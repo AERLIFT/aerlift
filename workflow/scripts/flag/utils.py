@@ -67,7 +67,7 @@ def flag_summary(
     Args:
         ds: xarray dataset with flags
         per_var_bits: mapping of flag_var → {bit: name} — only the bits that
-            apply to each variable, so the CSV shows correct flag names per row
+        apply to each variable, so the CSV shows correct flag names per row
     Returns:
         Tidy DataFrame with one row per (sensor, flag_var, bit). Columns:
         sensor, flag_var, bit, flag_name, n_flagged, n_total,
