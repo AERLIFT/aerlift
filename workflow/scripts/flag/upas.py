@@ -20,14 +20,18 @@ except NameError:
                 "pm_min": 0.0,
                 "battery_min": 20,
                 "pm_zero_run_mins": 10,
+                "voc_raw_min": 0.0,
+                "nox_raw_min": 0.0,
+            }
+            universal = {
                 "temperature_min": -5.0,
                 "temperature_max": 50.0,
                 "rh_min": 0.0,
                 "rh_max": 100.0,
+                "pressure_min": 950.0,
+                "pressure_max": 1050.0,
                 "co2_min": 400.0,
                 "co2_max": 5000.0,
-                "voc_raw_min": 0.0,
-                "nox_raw_min": 0.0,
             }
             instrument = "upas"
 
@@ -236,14 +240,36 @@ if __name__ == "__main__":
     log.info(f"Loaded {snakemake.input.nc}: {dict(ds.sizes)}")
 
     flag_bits = {int(k): v for k, v in snakemake.params.flag_bits.items()}
-    thresholds = snakemake.params.thresholds
+    thresholds = {**snakemake.params.universal, **snakemake.params.thresholds}
 
     ds, flag_vars = flag_upas(ds, thresholds, flag_bits)
     ds = update_metadata(ds)
 
-    # summary csv
-    all_bits = {1: "out_of_range", **flag_bits}
-    summary = flag_summary(ds, flag_vars, all_bits)
+    # summary csv — PM vars use instrument bits; met/gas vars use bit 1
+    pm_mc_vars = ["upas_pm1_mc", "upas_pm25_mc", "upas_pm4_mc", "upas_pm10_mc"]
+    pm_nc_vars = [
+        "upas_pm05_nc",
+        "upas_pm1_nc",
+        "upas_pm25_nc",
+        "upas_pm4_nc",
+        "upas_pm10_nc",
+    ]
+    per_var_bits = {
+        **{
+            f"flag_{v}": {1: "out_of_range", 4: "pm_negative", 16: "pm_zero_run"}
+            for v in pm_mc_vars + pm_nc_vars
+        },
+        "flag_upas_pm_typical_size": {16: "pm_zero_run"},
+        "flag_battery": {8: "low_battery"},
+        "flag_upas_atmo_temperature": {1: "out_of_range"},
+        "flag_upas_atmo_rh": {1: "out_of_range"},
+        **{
+            f"flag_{v}": {1: "out_of_range"}
+            for v in ["upas_co2", "upas_voc_raw", "upas_nox_raw"]
+            if f"flag_{v}" in ds
+        },
+    }
+    summary = flag_summary(ds, per_var_bits)
     summary.to_csv(snakemake.output.csv, index=False)
     log.info(f"Wrote {snakemake.output.csv}")
     log.info(f"\n{summary.to_string()}")

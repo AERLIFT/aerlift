@@ -19,6 +19,16 @@ except NameError:
                 "pm_min": 0.0,
                 "voc_raw_min": 0.0,
             }
+            universal = {
+                "temperature_min": -5.0,
+                "temperature_max": 50.0,
+                "rh_min": 0.0,
+                "rh_max": 100.0,
+                "pressure_min": 950.0,
+                "pressure_max": 1050.0,
+                "co2_min": 400.0,
+                "co2_max": 5000.0,
+            }
             instrument = "atmotube"
 
         class input:
@@ -43,7 +53,7 @@ log = logging.getLogger(__name__)
 # ── flag logic ────────────────────────────────────────────────────────────────
 def flag_atmotube(
     ds: xr.Dataset, thresholds: dict[str, float], flag_bits: dict[int, str]
-) -> xr.Dataset:
+) -> tuple[xr.Dataset, list[str]]:
     """Flag AtmoTube data
     Args:
         ds: xarray dataset with AtmoTube data
@@ -51,6 +61,7 @@ def flag_atmotube(
         flag_bits: dictionary of flag bit descriptions
     Returns:
         ds: xarray dataset with AtmoTube flags added
+        flag_vars: list of flag variable names
     """
     t = thresholds
 
@@ -79,13 +90,56 @@ def flag_atmotube(
         "bit_8": "voc_negative",
     }
 
-    ds["flag_global"] = compute_flag_global(ds, ["flag_pm", "flag_voc"])
+    # flag_temperature
+    f = init_flag(ds, "temperature")
+    f = apply_flag(f, ds["temperature"] < t["temperature_min"], 1)
+    f = apply_flag(f, ds["temperature"] > t["temperature_max"], 1)
+    ds["flag_temperature"] = f
+    ds["flag_temperature"].attrs = {
+        "long_name": "quality flag for temperature",
+        "bit_1": "out_of_range",
+    }
+
+    # flag_rh
+    f = init_flag(ds, "rh")
+    f = apply_flag(f, ds["rh"] < t["rh_min"], 1)
+    f = apply_flag(f, ds["rh"] > t["rh_max"], 1)
+    ds["flag_rh"] = f
+    ds["flag_rh"].attrs = {
+        "long_name": "quality flag for rh",
+        "bit_1": "out_of_range",
+    }
+
+    # flag_pressure
+    f = init_flag(ds, "pressure")
+    f = apply_flag(f, ds["pressure"] < t["pressure_min"], 1)
+    f = apply_flag(f, ds["pressure"] > t["pressure_max"], 1)
+    ds["flag_pressure"] = f
+    ds["flag_pressure"].attrs = {
+        "long_name": "quality flag for pressure",
+        "bit_1": "out_of_range",
+    }
+
+    # flag_co2 (optional — may be all-NaN on units without CO2 sensor)
+    flag_vars = ["flag_pm", "flag_voc", "flag_temperature", "flag_rh", "flag_pressure"]
+    if "co2" in ds and not ds["co2"].isnull().all():
+        f = init_flag(ds, "co2")
+        f = apply_flag(f, ds["co2"] < t["co2_min"], 1)
+        f = apply_flag(f, ds["co2"] > t["co2_max"], 1)
+        ds["flag_co2"] = f
+        ds["flag_co2"].attrs = {
+            "long_name": "quality flag for co2",
+            "bit_1": "out_of_range",
+        }
+        flag_vars.append("flag_co2")
+
+    ds["flag_global"] = compute_flag_global(ds, flag_vars)
     ds["flag_global"].attrs = {
         "long_name": "global quality flag — bitwise OR of all flag variables",
         "flag_bits": str({1: "out_of_range", **flag_bits}),
     }
 
-    return ds
+    return ds, flag_vars
 
 
 def update_metadata(ds: xr.Dataset) -> xr.Dataset:
@@ -108,16 +162,25 @@ if __name__ == "__main__":
     log.info(f"Loaded {snakemake.input.nc}: {dict(ds.sizes)}")
 
     flag_bits = {int(k): v for k, v in snakemake.params.flag_bits.items()}
-    thresholds = snakemake.params.thresholds
+    thresholds = {**snakemake.params.universal, **snakemake.params.thresholds}
 
-    ds = flag_atmotube(ds, thresholds, flag_bits)
+    ds, flag_vars = flag_atmotube(ds, thresholds, flag_bits)
     ds = update_metadata(ds)
 
     # summary csv
-    all_bits = {1: "out_of_range", **flag_bits}
-    summary = flag_summary(ds, ["flag_pm", "flag_voc"], all_bits)
+    per_var_bits = {
+        "flag_pm": {1: "out_of_range", 4: "pm_negative"},
+        "flag_voc": {1: "out_of_range", 8: "voc_negative"},
+        "flag_temperature": {1: "out_of_range"},
+        "flag_rh": {1: "out_of_range"},
+        "flag_pressure": {1: "out_of_range"},
+    }
+    if "flag_co2" in ds:
+        per_var_bits["flag_co2"] = {1: "out_of_range"}
+    summary = flag_summary(ds, per_var_bits)
     summary.to_csv(snakemake.output.csv, index=False)
     log.info(f"Wrote {snakemake.output.csv}")
+    log.info(f"\n{summary.to_string()}")
 
     # netcdf
     out_path = Path(snakemake.output.nc)

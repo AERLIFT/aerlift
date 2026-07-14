@@ -19,12 +19,16 @@ except NameError:
             thresholds = {
                 "pm_min": 0.0,
                 "warmup_minutes": 5,
+                "voc_raw_min": 0.0,
+                "nox_raw_min": 0.0,
+            }
+            universal = {
                 "temperature_min": -5.0,
                 "temperature_max": 50.0,
                 "rh_min": 0.0,
                 "rh_max": 100.0,
-                "voc_raw_min": 0.0,
-                "nox_raw_min": 0.0,
+                "pressure_min": 950.0,
+                "pressure_max": 1050.0,
                 "co2_min": 400.0,
                 "co2_max": 5000.0,
             }
@@ -198,15 +202,30 @@ if __name__ == "__main__":
     log.info(f"Loaded {snakemake.input.nc}: {dict(ds.sizes)}")
 
     flag_bits = {int(k): v for k, v in snakemake.params.flag_bits.items()}
-    thresholds = snakemake.params.thresholds
+    thresholds = {**snakemake.params.universal, **snakemake.params.thresholds}
     alphasense = snakemake.params.alphasense
 
     ds, flag_vars = flag_hhb(ds, thresholds, flag_bits, alphasense)
     ds = update_metadata(ds)
 
-    # summary csv
-    all_bits = {1: "out_of_range", **flag_bits}
-    summary = flag_summary(ds, flag_vars, all_bits)
+    # summary csv — PM/electrochemical vars use instrument bits; met/gas vars use bit 1
+    g1 = f"{alphasense['position_1']}_algorithm1"
+    g2 = f"{alphasense['position_2']}_algorithm1"
+    pm_vars = ["sen_pm1_raw", "sen_pm25_raw", "sen_pm4_raw", "sen_pm10_raw"]
+    per_var_bits = {
+        **{f"flag_{v}": {1: "out_of_range", **flag_bits} for v in pm_vars},
+        "flag_sen_temperature": {1: "out_of_range"},
+        "flag_sen_rh": {1: "out_of_range"},
+        "flag_sen_voc_raw": {1: "out_of_range"},
+        "flag_sen_nox_raw": {1: "out_of_range"},
+        "flag_scd30_co2": {1: "out_of_range"},
+        **{
+            f"flag_{v}": {8: "electrochemical_warmup"}
+            for v in [g1, g2]
+            if f"flag_{v}" in ds
+        },
+    }
+    summary = flag_summary(ds, per_var_bits)
     summary.to_csv(snakemake.output.csv, index=False)
     log.info(f"Wrote {snakemake.output.csv}")
     log.info(f"\n{summary.to_string()}")

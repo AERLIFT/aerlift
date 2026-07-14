@@ -1,4 +1,4 @@
-2026-07-02 22:11:28,134 INFO Starting HHB NetCDF conversion
-2026-07-02 22:11:30,063 INFO 1008000 records, 50 sensors
-2026-07-02 22:11:30,254 INFO Wrote /aerlift/data/1_munged_synth/hhb_summary.csv
-2026-07-02 22:11:31,919 INFO Wrote /aerlift/data/1_munged_synth/hhb.nc
+2026-07-14 15:59:43,941 INFO Starting HHB NetCDF conversion
+2026-07-14 15:59:45,841 INFO 1008000 records, 50 sensors
+2026-07-14 15:59:45,999 INFO Wrote /aerlift/data/1_munged_synth/hhb_summary.csv
+2026-07-14 15:59:47,604 INFO Wrote /aerlift/data/1_munged_synth/hhb.nc

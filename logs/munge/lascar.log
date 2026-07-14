@@ -1,4 +1,4 @@
-2026-07-02 21:58:52,917 INFO Starting Lascar munging
-2026-07-02 21:58:53,346 INFO Dropped 0 duplicate rows, 504000 records remain
-2026-07-02 21:58:53,443 INFO Wrote /aerlift/data/1_munged_synth/lascar_summary.csv
-2026-07-02 21:58:53,553 INFO Wrote /aerlift/data/1_munged_synth/lascar.nc
+2026-07-14 15:59:38,150 INFO Starting Lascar munging
+2026-07-14 15:59:38,554 INFO Dropped 0 duplicate rows, 504000 records remain
+2026-07-14 15:59:38,591 INFO Wrote /aerlift/data/1_munged_synth/lascar_summary.csv
+2026-07-14 15:59:38,671 INFO Wrote /aerlift/data/1_munged_synth/lascar.nc

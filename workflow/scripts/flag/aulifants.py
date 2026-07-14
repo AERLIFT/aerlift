@@ -100,8 +100,12 @@ if __name__ == "__main__":
     ds = update_metadata(ds)
 
     # summary csv
-    all_bits = {1: "out_of_range", **flag_bits}
-    summary = flag_summary(ds, ["flag_voltage"], all_bits)
+    summary = flag_summary(
+        ds,
+        {
+            "flag_voltage": {1: "out_of_range", **flag_bits},
+        },
+    )
     summary.to_csv(snakemake.output.csv, index=False)
     log.info(f"Wrote {snakemake.output.csv}")
 

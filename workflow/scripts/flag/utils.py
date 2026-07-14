@@ -28,32 +28,60 @@ def init_flag(ds: xr.Dataset, var: str) -> xr.DataArray:
     return xr.zeros_like(ds[var], dtype=np.int16)
 
 
+def _sample_dt_hours(ds: xr.Dataset) -> float:
+    """Return median sample interval in hours, or NaN if time coord is absent/short."""
+    for dim in ("time", "datetime"):
+        if dim in ds.coords:
+            t = ds[dim].values
+            if len(t) < 2:
+                return float("nan")
+            return float(np.median(np.diff(t)) / np.timedelta64(1, "h"))
+    return float("nan")
+
+
 def flag_summary(
-    ds: xr.Dataset, flag_vars: list[str], flag_bits: dict[int, str]
+    ds: xr.Dataset, per_var_bits: dict[str, dict[int, str]]
 ) -> pd.DataFrame:
-    """Compute summary statistics for flagged variables
+    """Compute per-sensor summary statistics for flagged variables.
     Args:
         ds: xarray dataset with flags
-        flag_vars: list of flag variable names
-        flag_bits: dictionary of flag bit descriptions
+        per_var_bits: mapping of flag_var → {bit: name} — only the bits that
+            apply to each variable, so the CSV shows correct flag names per row
     Returns:
-        DataFrame with summary statistics for each flag variable and flag bit
+        Tidy DataFrame with one row per (sensor, flag_var, bit). Columns:
+        sensor, flag_var, bit, flag_name, n_flagged, n_total,
+        uptime_hours, hours_flagged, proportion_flagged.
+        sensor is None for datasets without a sensor coordinate.
     """
+    dt_h = _sample_dt_hours(ds)
+    sensors = list(ds["sensor"].values) if "sensor" in ds.coords else [None]
     rows = []
-    for fv in flag_vars:
-        for bit, name in flag_bits.items():
-            count = int(((ds[fv] & bit) > 0).sum())
-            total = int(ds[fv].count())
-            rows.append(
-                {
-                    "flag_var": fv,
-                    "bit": bit,
-                    "flag_name": name,
-                    "n_flagged": count,
-                    "n_total": total,
-                    "pct_flagged": round(100 * count / total, 2) if total > 0 else 0.0,
-                }
-            )
+    for sensor in sensors:
+        ds_s = ds.sel(sensor=sensor) if sensor is not None else ds
+        for fv, flag_bits in per_var_bits.items():
+            for bit, name in flag_bits.items():
+                count = int(((ds_s[fv] & bit) > 0).sum())
+                total = int(ds_s[fv].count())
+                proportion = round(count / total, 4) if total > 0 else 0.0
+                uptime_h = (
+                    round(total * dt_h, 3) if not np.isnan(dt_h) else float("nan")
+                )
+                hours_flagged = (
+                    round(count * dt_h, 4) if not np.isnan(dt_h) else float("nan")
+                )
+                rows.append(
+                    {
+                        "sensor": sensor,
+                        "flag_var": fv,
+                        "bit": bit,
+                        "flag_name": name,
+                        "n_flagged": count,
+                        "n_total": total,
+                        "uptime_hours": uptime_h,
+                        "hours_flagged": hours_flagged,
+                        "proportion_flagged": proportion,
+                    }
+                )
     return pd.DataFrame(rows)
 
 

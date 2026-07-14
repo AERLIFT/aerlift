@@ -15,15 +15,16 @@ except NameError:
     class snakemake:
         class params:
             flag_bits = {4: "co2_low", 8: "co2_high"}
-            thresholds = {
-                "co2_min": 400.0,
-                "co2_max": 5000.0,
+            thresholds = {}
+            universal = {
                 "temperature_min": -5.0,
                 "temperature_max": 50.0,
                 "rh_min": 0.0,
                 "rh_max": 100.0,
                 "pressure_min": 950.0,
                 "pressure_max": 1050.0,
+                "co2_min": 400.0,
+                "co2_max": 5000.0,
             }
             instrument = "aranet"
 
@@ -133,15 +134,21 @@ if __name__ == "__main__":
     log.info(f"Loaded {snakemake.input.nc}: {dict(ds.sizes)}")
 
     flag_bits = {int(k): v for k, v in snakemake.params.flag_bits.items()}
-    thresholds = snakemake.params.thresholds
+    thresholds = {**snakemake.params.universal, **snakemake.params.thresholds}
 
     ds = flag_aranet(ds, thresholds, flag_bits)
     ds = update_metadata(ds)
 
-    # summary csv
-    all_bits = {1: "out_of_range", **flag_bits}
-    flag_vars = ["flag_co2", "flag_temperature", "flag_rh", "flag_pressure"]
-    summary = flag_summary(ds, flag_vars, all_bits)
+    # summary csv — aranet CO2 uses directional bits (4/8), met vars use bit 1
+    summary = flag_summary(
+        ds,
+        {
+            "flag_co2": {4: "co2_low", 8: "co2_high"},
+            "flag_temperature": {1: "out_of_range"},
+            "flag_rh": {1: "out_of_range"},
+            "flag_pressure": {1: "out_of_range"},
+        },
+    )
     summary.to_csv(snakemake.output.csv, index=False)
     log.info(f"Wrote {snakemake.output.csv}")
     log.info(f"\n{summary.to_string()}")

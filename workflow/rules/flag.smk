@@ -31,6 +31,7 @@ rule flag_aranet:
         instrument="aranet",
         flag_bits=config["flag"]["aranet"]["bits"],
         thresholds=config["flag"]["aranet"]["thresholds"],
+        universal=config["flag"]["universal"],
     conda:
         "../envs/python.yaml"
     script:
@@ -67,6 +68,7 @@ rule flag_atmotube:
         instrument="atmotube",
         flag_bits=config["flag"]["atmotube"]["bits"],
         thresholds=config["flag"]["atmotube"]["thresholds"],
+        universal=config["flag"]["universal"],
     conda:
         "../envs/python.yaml"
     script:
@@ -85,6 +87,7 @@ rule flag_hhb:
         instrument="hhb",
         flag_bits=config["flag"]["hhb"]["bits"],
         thresholds=config["flag"]["hhb"]["thresholds"],
+        universal=config["flag"]["universal"],
         alphasense=config["instruments"]["hhb"]["alphasense"],
     conda:
         "../envs/python.yaml"
@@ -104,6 +107,7 @@ rule flag_upas:
         instrument="upas",
         flag_bits=config["flag"]["upas"]["bits"],
         thresholds=config["flag"]["upas"]["thresholds"],
+        universal=config["flag"]["universal"],
     conda:
         "../envs/python.yaml"
     script:

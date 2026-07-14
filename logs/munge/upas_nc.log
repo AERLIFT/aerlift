@@ -1,5 +1,5 @@
-2026-07-02 22:14:15,250 INFO Starting UPAS NetCDF conversion
-2026-07-02 22:14:18,753 INFO Dropped 0 duplicate rows
-2026-07-02 22:14:18,839 INFO 1008000 records, 50 sensors
-2026-07-02 22:14:19,323 INFO Wrote /aerlift/data/1_munged_synth/upas_summary.csv
-2026-07-02 22:14:23,409 INFO Wrote /aerlift/data/1_munged_synth/upas.nc
+2026-07-14 15:59:39,828 INFO Starting UPAS NetCDF conversion
+2026-07-14 15:59:44,333 INFO Dropped 0 duplicate rows
+2026-07-14 15:59:44,419 INFO 1008000 records, 50 sensors
+2026-07-14 15:59:44,926 INFO Wrote /aerlift/data/1_munged_synth/upas_summary.csv
+2026-07-14 15:59:49,778 INFO Wrote /aerlift/data/1_munged_synth/upas.nc
