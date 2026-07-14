@@ -211,6 +211,79 @@ def aggregate_campaign(ds_masked: xr.Dataset, completeness: float) -> xr.Dataset
     return ds
 
 
+def deployment_start(ds_masked: xr.Dataset) -> dict:
+    """Return the first datetime with any valid (non-NaN) data per household.
+
+    Reduces across all measurement variables so a household is considered
+    "deployed" from the moment its earliest sensor reports anything.
+    Args:
+        ds_masked: flag-masked measurement dataset with household_id and datetime dims
+    Returns:
+        dict mapping household_id → np.datetime64 (NaT if no valid data)
+    """
+    any_data = ds_masked.to_array(dim="variable").notnull().any("variable")
+    datetimes = ds_masked["datetime"].values
+    t0 = {}
+    for hh in ds_masked["household_id"].values:
+        mask = any_data.sel(household_id=hh).values
+        valid = datetimes[mask]
+        t0[hh] = valid[0] if len(valid) > 0 else np.datetime64("NaT")
+    return t0
+
+
+def add_deployment_hours(ds_net: xr.Dataset, t0: dict, period: str) -> xr.Dataset:
+    """Add ``deployment_hours`` — cumulative hours since first valid observation.
+
+    For binned periods each bin gets the elapsed hours from that household's
+    deployment start to the bin datetime (NaN before deployment starts).
+    For the campaign period each household gets a single total-hours value.
+    Args:
+        ds_net: aggregated network dataset
+        t0: mapping of household_id → deployment start datetime (from deployment_start)
+        period: period token ("5min", "1hour", "1day", "campaign")
+    Returns:
+        ds_net with ``deployment_hours`` variable added
+    """
+    households = ds_net["household_id"].values
+
+    if period == "campaign":
+        t_end = np.datetime64(ds_net.attrs["campaign_end"])
+        hours = [
+            (
+                float((t_end - t0[hh]) / np.timedelta64(1, "h"))
+                if not np.isnat(np.array(t0[hh], dtype="datetime64"))
+                else np.nan
+            )
+            for hh in households
+        ]
+        da = xr.DataArray(
+            hours,
+            dims=["household_id"],
+            coords={"household_id": households},
+        )
+    else:
+        datetimes = ds_net["datetime"].values
+        data = np.full((len(households), len(datetimes)), np.nan)
+        for i, hh in enumerate(households):
+            start = t0[hh]
+            if not np.isnat(np.array(start, dtype="datetime64")):
+                elapsed = (datetimes - start) / np.timedelta64(1, "h")
+                data[i, :] = np.where(elapsed >= 0, elapsed, np.nan)
+        da = xr.DataArray(
+            data,
+            dims=["household_id", "datetime"],
+            coords={"household_id": households, "datetime": datetimes},
+        )
+
+    da.attrs = {
+        "long_name": "cumulative hours since first valid observation",
+        "units": "hours",
+        "comment": "deployment start taken as first non-NaN timestamp across all variables",
+    }
+    ds_net["deployment_hours"] = da
+    return ds_net
+
+
 def aggregate(
     ds_masked: xr.Dataset, period: str, freq: str, completeness: float
 ) -> xr.Dataset:
@@ -269,8 +342,13 @@ if __name__ == "__main__":
         f"masked {n_masked} flagged records"
     )
 
+    # deployment start per household (before aggregation collapses the time axis)
+    t0 = deployment_start(ds_masked)
+    log.info(f"Deployment starts: { {k: str(v) for k, v in t0.items()} }")
+
     # aggregate with completeness gate
     ds_net = aggregate(ds_masked, period, freq, completeness)
+    ds_net = add_deployment_hours(ds_net, t0, period)
     ds_net.attrs = {**dict(ds.attrs), **ds_net.attrs}
     ds_net = update_metadata(ds_net, period, freq, completeness)
     log.info(f"Aggregated to {period}: {dict(ds_net.sizes)}")
