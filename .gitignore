@@ -1,5 +1,5 @@
 /.env
 .snakemake/
 logs/
-.ipynb
+*.ipynb
 docs/_build/
