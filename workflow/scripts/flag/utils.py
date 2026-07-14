@@ -54,11 +54,20 @@ def flag_summary(
         sensor is None for datasets without a sensor coordinate.
     """
     dt_h = _sample_dt_hours(ds)
+    trim_start = ds.attrs.get("trim_start", "")
+    trim_end = ds.attrs.get("trim_end", "")
     sensors = list(ds["sensor"].values) if "sensor" in ds.coords else [None]
     rows = []
-    for sensor in sensors:
-        ds_s = ds.sel(sensor=sensor) if sensor is not None else ds
-        for fv, flag_bits in per_var_bits.items():
+    for fv, flag_bits in per_var_bits.items():
+        src_var = fv[5:] if fv.startswith("flag_") else fv
+        if src_var in ds:
+            long_name = ds[src_var].attrs.get("long_name", "")
+            units = ds[src_var].attrs.get("units", "")
+        else:
+            long_name = ds[fv].attrs.get("src_long_name", "")
+            units = ds[fv].attrs.get("src_units", "")
+        for sensor in sensors:
+            ds_s = ds.sel(sensor=sensor) if sensor is not None else ds
             for bit, name in flag_bits.items():
                 count = int(((ds_s[fv] & bit) > 0).sum())
                 total = int(ds_s[fv].count())
@@ -80,6 +89,10 @@ def flag_summary(
                         "uptime_hours": uptime_h,
                         "hours_flagged": hours_flagged,
                         "proportion_flagged": proportion,
+                        "long_name": long_name,
+                        "units": units,
+                        "trim_start": trim_start,
+                        "trim_end": trim_end,
                     }
                 )
     return pd.DataFrame(rows)

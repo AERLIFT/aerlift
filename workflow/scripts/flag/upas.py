@@ -158,6 +158,8 @@ def flag_upas(
     ds["flag_upas_pm_typical_size"].attrs = {
         "long_name": "quality flag for upas_pm_typical_size",
         "bit_16": "pm_zero_run",
+        "src_long_name": "PM typical particle size",
+        "src_units": "µm",
     }
 
     # ── battery ───────────────────────────────────────────────────────────────
@@ -167,6 +169,8 @@ def flag_upas(
     ds["flag_battery"].attrs = {
         "long_name": "quality flag for battery charge",
         "bit_8": "low_battery",
+        "src_long_name": "battery charge",
+        "src_units": "%",
     }
 
     # ── met ───────────────────────────────────────────────────────────────────

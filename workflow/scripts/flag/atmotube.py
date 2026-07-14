@@ -78,6 +78,8 @@ def flag_atmotube(
         "long_name": "quality flag for PM channels",
         "flag_bits": str(flag_bits),
         "bit_4": "pm_negative",
+        "src_long_name": "PM mass concentration",
+        "src_units": "µg/m³",
     }
 
     # flag_voc — TVOC below zero
@@ -88,6 +90,8 @@ def flag_atmotube(
         "long_name": "quality flag for VOC",
         "flag_bits": str(flag_bits),
         "bit_8": "voc_negative",
+        "src_long_name": "total VOC concentration",
+        "src_units": "ppm",
     }
 
     # flag_temperature
