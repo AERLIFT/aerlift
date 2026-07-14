@@ -39,6 +39,27 @@ def _sample_dt_hours(ds: xr.Dataset) -> float:
     return float("nan")
 
 
+def _var_meta(ds: xr.Dataset, fv: str) -> tuple[str, str]:
+    src_var = fv[5:] if fv.startswith("flag_") else fv
+    if src_var in ds:
+        return ds[src_var].attrs.get("long_name", ""), ds[src_var].attrs.get(
+            "units", ""
+        )
+    return ds[fv].attrs.get("src_long_name", ""), ds[fv].attrs.get("src_units", "")
+
+
+def _bit_stats(ds_s: xr.Dataset, fv: str, bit: int, dt_h: float) -> dict:
+    count = int(((ds_s[fv] & bit) > 0).sum())
+    total = int(ds_s[fv].count())
+    return {
+        "n_flagged": count,
+        "n_total": total,
+        "proportion_flagged": round(count / total, 4) if total > 0 else 0.0,
+        "uptime_hours": round(total * dt_h, 3) if not np.isnan(dt_h) else float("nan"),
+        "hours_flagged": round(count * dt_h, 4) if not np.isnan(dt_h) else float("nan"),
+    }
+
+
 def flag_summary(
     ds: xr.Dataset, per_var_bits: dict[str, dict[int, str]]
 ) -> pd.DataFrame:
@@ -59,36 +80,17 @@ def flag_summary(
     sensors = list(ds["sensor"].values) if "sensor" in ds.coords else [None]
     rows = []
     for fv, flag_bits in per_var_bits.items():
-        src_var = fv[5:] if fv.startswith("flag_") else fv
-        if src_var in ds:
-            long_name = ds[src_var].attrs.get("long_name", "")
-            units = ds[src_var].attrs.get("units", "")
-        else:
-            long_name = ds[fv].attrs.get("src_long_name", "")
-            units = ds[fv].attrs.get("src_units", "")
+        long_name, units = _var_meta(ds, fv)
         for sensor in sensors:
             ds_s = ds.sel(sensor=sensor) if sensor is not None else ds
             for bit, name in flag_bits.items():
-                count = int(((ds_s[fv] & bit) > 0).sum())
-                total = int(ds_s[fv].count())
-                proportion = round(count / total, 4) if total > 0 else 0.0
-                uptime_h = (
-                    round(total * dt_h, 3) if not np.isnan(dt_h) else float("nan")
-                )
-                hours_flagged = (
-                    round(count * dt_h, 4) if not np.isnan(dt_h) else float("nan")
-                )
                 rows.append(
                     {
                         "sensor": sensor,
                         "flag_var": fv,
                         "bit": bit,
                         "flag_name": name,
-                        "n_flagged": count,
-                        "n_total": total,
-                        "uptime_hours": uptime_h,
-                        "hours_flagged": hours_flagged,
-                        "proportion_flagged": proportion,
+                        **_bit_stats(ds_s, fv, bit, dt_h),
                         "long_name": long_name,
                         "units": units,
                         "trim_start": trim_start,
