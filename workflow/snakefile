@@ -1,5 +1,3 @@
-configfile: "config/config.yaml"
-
 
 from pathlib import Path
 

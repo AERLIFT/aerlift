@@ -11,7 +11,7 @@ log_dir:     'logs'
 
 #%% synthetic flag
 synthetic:    'true'
-metadata_csv: '/aerlift/data/0_synthetic/campaign_metadata.csv'
+metadata_file: '/aerlift/data/0_synthetic/campaign_metadata.csv'
 
 #%% campaign  (7-day window matching generate_campaign.py defaults)
 campaign:

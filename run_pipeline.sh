@@ -6,6 +6,15 @@ REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LOG_DIR="$REPO_DIR/logs/runs"
 LOCK_FILE="/tmp/aerlift_pipeline.lock"
 CORES="${AERLIFT_CORES:-2}"
+CONFIG="${AERLIFT_CONFIG:-config/config.yaml}"
+
+# ── parse args ────────────────────────────────────────────────────────────────
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --config|-c) CONFIG="$2"; shift 2 ;;
+        *) echo "Unknown argument: $1" >&2; exit 1 ;;
+    esac
+done
 
 # ── lock: prevent overlapping cron runs ───────────────────────────────────────
 if [ -f "$LOCK_FILE" ]; then
@@ -25,7 +34,7 @@ mkdir -p "$LOG_DIR"
 LOG="$LOG_DIR/$(date +%Y%m%d_%H%M%S).log"
 exec > >(tee -a "$LOG") 2>&1
 
-echo "[$(date)] Starting AERLIFT pipeline (cores=$CORES)"
+echo "[$(date)] Starting AERLIFT pipeline (cores=$CORES, config=$CONFIG)"
 echo "[$(date)] Log: $LOG"
 
 # ── run ───────────────────────────────────────────────────────────────────────
@@ -34,6 +43,7 @@ cd "$REPO_DIR"
 docker compose run --rm aerlift \
     snakemake \
     --snakefile workflow/snakefile \
+    --configfile "$CONFIG" \
     --cores "$CORES"
 
 echo "[$(date)] Pipeline complete."

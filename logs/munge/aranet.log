@@ -1,5 +1,5 @@
-2026-07-14 15:59:40,882 INFO Starting Aranet4 munging
-2026-07-14 15:59:43,253 INFO Dropped 363 duplicate rows, 984359 records remain
-2026-07-14 15:59:43,342 INFO Processed 50 files
-2026-07-14 15:59:43,352 INFO Wrote /aerlift/data/1_munged_synth/aranet_summary.csv
-2026-07-14 15:59:43,634 INFO Wrote /aerlift/data/1_munged_synth/aranet.nc
+2026-07-15 17:45:42,016 INFO Starting Aranet4 munging
+2026-07-15 17:45:45,431 INFO Dropped 363 duplicate rows, 984359 records remain
+2026-07-15 17:45:45,536 INFO Processed 50 files
+2026-07-15 17:45:45,555 INFO Wrote /aerlift/data/1_munged_synth/aranet_summary.csv
+2026-07-15 17:45:45,969 INFO Wrote /aerlift/data/1_munged_synth/aranet.nc
