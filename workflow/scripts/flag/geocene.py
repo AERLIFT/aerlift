@@ -38,14 +38,10 @@ log = logging.getLogger(__name__)
 
 
 # ── flag logic ────────────────────────────────────────────────────────────────
-def flag_geocene(
-    ds: xr.Dataset, thresholds: dict[str, float], flag_bits: dict[int, str]
-) -> xr.Dataset:
+def flag_geocene(ds: xr.Dataset) -> xr.Dataset:
     """Flag Geocene data (currently just identity/placeholder)
     Args:
         ds: xarray dataset with Geocene data
-        thresholds: dictionary of thresholds for each flag
-        flag_bits: dictionary of flag bit descriptions
     Returns:
         ds: xarray dataset
     """
@@ -83,10 +79,7 @@ if __name__ == "__main__":
     ds = xr.open_dataset(snakemake.input.nc)
     log.info(f"Loaded {snakemake.input.nc}: {dict(ds.sizes)}")
 
-    flag_bits = {int(k): v for k, v in snakemake.params.flag_bits.items()}
-    thresholds = snakemake.params.thresholds
-
-    ds = flag_geocene(ds, thresholds, flag_bits)
+    ds = flag_geocene(ds)
     ds = update_metadata(ds)
 
     # summary csv

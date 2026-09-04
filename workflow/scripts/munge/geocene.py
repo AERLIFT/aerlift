@@ -35,11 +35,10 @@ log = logging.getLogger(__name__)
 
 
 # ── functions ─────────────────────────────────────────────────────────────────
-def read_geocene_file(file: str, timezone: str) -> pd.DataFrame:
+def read_geocene_file(file: str) -> pd.DataFrame:
     """Reads the geocene events file and returns a pd.DataFrame.
     Args:
         file: file path to geocene events.csv file
-        timezone: timezone to parse datetime in (though events are UTC)
     Returns:
         df: DataFrame with standardized columns
     """
@@ -59,15 +58,14 @@ def read_geocene_file(file: str, timezone: str) -> pd.DataFrame:
     return df
 
 
-def process_geocene(input_file: str, params: Any) -> xr.Dataset:
+def process_geocene(input_file: str) -> xr.Dataset:
     """Parses & standardizes geocene events, and returns an xarray Dataset.
     Args:
         input_file: path to events.csv
-        params: snakemake params object
     Returns:
         an xarray Dataset
     """
-    df = read_geocene_file(input_file, params.timezone)
+    df = read_geocene_file(input_file)
 
     # For events, we might have multiple events per sensor.
     # Standard munged files seem to be sensor-datetime indexed.
@@ -120,7 +118,7 @@ if __name__ == "__main__":
     # ── main ──────────────────────────────────────────────────────────────────────
     log.info("Starting Geocene munging")
 
-    ds_geocene = process_geocene(snakemake.input.events, snakemake.params)
+    ds_geocene = process_geocene(snakemake.input.events)
     log.info("Processed Geocene events file")
 
     ds_geocene = add_metadata(ds_geocene, snakemake.params)
