@@ -1,3 +1,3 @@
-2026-07-15 18:15:59,320 INFO Starting anemometer munging
-2026-07-15 18:16:00,046 INFO Wrote /aerlift/data/1_munged_synth/anemometer_summary.csv
-2026-07-15 18:16:00,158 INFO Wrote /aerlift/data/1_munged_synth/anemometer.nc
+2026-09-03 17:48:57,252 INFO Starting anemometer munging
+2026-09-03 17:48:58,129 INFO Wrote /Users/markcampmier/Library/Mobile Documents/com~apple~CloudDocs/aerlift/data/1_munged/anemometer_summary.csv
+2026-09-03 17:48:58,219 INFO Wrote /Users/markcampmier/Library/Mobile Documents/com~apple~CloudDocs/aerlift/data/1_munged/anemometer.nc
