@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 import logging
 import numpy as np
 import xarray as xr
-from typing import Any, Optional, Union, List, Dict
+from typing import Any, Optional, List, Dict
 
 try:
     snakemake

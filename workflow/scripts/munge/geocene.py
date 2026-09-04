@@ -121,7 +121,7 @@ if __name__ == "__main__":
     log.info("Starting Geocene munging")
 
     ds_geocene = process_geocene(snakemake.input.events, snakemake.params)
-    log.info(f"Processed Geocene events file")
+    log.info("Processed Geocene events file")
 
     ds_geocene = add_metadata(ds_geocene, snakemake.params)
 
