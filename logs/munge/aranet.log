@@ -1,5 +1,5 @@
-2026-09-03 17:48:52,978 INFO Starting Aranet4 munging
-2026-09-03 17:48:54,603 INFO Dropped 363 duplicate rows, 984359 records remain
-2026-09-03 17:48:54,659 INFO Processed 50 files
-2026-09-03 17:48:54,664 INFO Wrote /Users/markcampmier/Library/Mobile Documents/com~apple~CloudDocs/aerlift/data/1_munged/aranet_summary.csv
-2026-09-03 17:48:54,946 INFO Wrote /Users/markcampmier/Library/Mobile Documents/com~apple~CloudDocs/aerlift/data/1_munged/aranet.nc
+2026-09-04 20:13:07,618 INFO Starting Aranet4 munging
+2026-09-04 20:13:09,477 INFO Dropped 363 duplicate rows, 984359 records remain
+2026-09-04 20:13:09,558 INFO Processed 50 files
+2026-09-04 20:13:09,565 INFO Wrote /aerlift/data/1_synth_munged/aranet_summary.csv
+2026-09-04 20:13:09,886 INFO Wrote /aerlift/data/1_synth_munged/aranet.nc

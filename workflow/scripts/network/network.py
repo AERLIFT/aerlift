@@ -88,147 +88,221 @@ def flag_var_for(ds: xr.Dataset, var: str) -> str | None:
     return flag_global if flag_global in ds else None
 
 
-def apply_flags(ds: xr.Dataset, measurement_vars: list[str]) -> tuple[xr.Dataset, int]:
-    """Mask flagged records (0 = good, any set bit = bad) to NaN and drop flags.
+def apply_flags_to_var(ds: xr.Dataset, var: str) -> tuple[np.ndarray, int]:
+    """Extract measurement variable values with flags applied as NaN.
     Args:
-        ds: merged xarray dataset with measurement and flag variables
-        measurement_vars: measurement variables to keep and flag
+        ds: merged xarray dataset
+        var: measurement variable name
     Returns:
-        ds_masked: dataset holding only measurement variables, bad records NaN'd
-        n_masked: number of (household, time) records set to NaN
+        tuple of (numpy array of values with bad records as NaN, count of masked records)
     """
-    ds_masked = ds[measurement_vars].copy()
+    da = ds[var]
+    vals = da.values
+    fv = flag_var_for(ds, var)
     n_masked = 0
+    if fv is not None and fv in ds:
+        bad = ds[fv].values > 0
+        n_masked = int(bad.sum())
+        if n_masked > 0:
+            vals = np.where(~bad, vals, np.nan)
+    return vals, n_masked
+
+
+def deployment_start(ds: xr.Dataset, measurement_vars: list[str]) -> dict:
+    """Return the first datetime with any valid (non-NaN) data per household.
+
+    Reduces across all measurement variables so a household is considered
+    "deployed" from the moment its earliest sensor reports anything.
+    Args:
+        ds: merged xarray dataset with household_id and datetime dims
+        measurement_vars: measurement variables to evaluate
+    Returns:
+        dict mapping household_id → np.datetime64 (NaT if no valid data)
+    """
+    datetimes = ds["datetime"].values
+    households = ds["household_id"].values
+    any_valid = np.zeros((len(households), len(datetimes)), dtype=bool)
     for v in measurement_vars:
-        fv = flag_var_for(ds, v)
-        if fv is None:
-            continue
-        bad = ds[fv] > 0  # NaN > 0 is False → gaps stay untouched (already NaN)
-        ds_masked[v] = ds_masked[v].where(~bad)
-        n_masked += int(bad.sum())
-    return ds_masked, n_masked
+        vals, _ = apply_flags_to_var(ds, v)
+        any_valid |= ~np.isnan(vals)
+
+    t0 = {}
+    for i, hh in enumerate(households):
+        if any_valid[i].any():
+            valid_dt = datetimes[any_valid[i]]
+            t0[hh] = valid_dt[0]
+        else:
+            t0[hh] = np.datetime64("NaT")
+    return t0
 
 
-def native_interval_s(da: xr.DataArray) -> float:
+def native_interval_s(vals: np.ndarray, datetimes: np.ndarray) -> float:
     """Infer a variable's native sampling interval in seconds.
 
     Uses the median spacing between timestamps that carry at least one non-null
     value across households, so completeness is measured against the sensor's
     own cadence rather than the merged (union) grid.
     Args:
-        da: measurement DataArray with a ``datetime`` dimension
+        vals: 2D numpy array of values (household_id x datetime)
+        datetimes: 1D numpy array of timestamps
     Returns:
         median native interval in seconds, or NaN if fewer than two samples
     """
-    other_dims = [d for d in da.dims if d != "datetime"]
-    present = da.notnull().any(other_dims) if other_dims else da.notnull()
-    times = da["datetime"].values[present.values]
-    if len(times) < 2:
+    present = np.any(~np.isnan(vals), axis=0) if vals.ndim > 1 else ~np.isnan(vals)
+    present_times = datetimes[present]
+    if len(present_times) < 2:
         return float("nan")
-    return float(np.median(np.diff(times).astype("timedelta64[s]").astype(float)))
+    return float(
+        np.median(np.diff(present_times).astype("timedelta64[s]").astype(float))
+    )
 
 
-def gate_by_completeness(
-    mean: xr.DataArray,
-    valid_count: xr.DataArray,
-    expected: float,
+def resample_variable_binned(
+    da: xr.DataArray,
+    vals: np.ndarray,
+    freq: str,
     completeness: float,
 ) -> xr.DataArray:
-    """Blank aggregated bins that fall below the completeness threshold.
+    """Resample a single variable to a fixed period, gated by completeness.
     Args:
-        mean: aggregated (mean) values per bin
-        valid_count: number of non-null native samples per bin
-        expected: expected number of native samples per bin
-        completeness: minimum required fraction of expected samples [0, 1]
+        da: original DataArray
+        vals: 2D numpy array of values
+        freq: pandas resample frequency
+        completeness: minimum required fraction of expected samples per bin
     Returns:
-        mean with under-sampled bins set to NaN
+        gated resampled DataArray
     """
+    datetimes = da["datetime"].values
+    households = da["household_id"].values
+    bin_seconds = pd.Timedelta(freq).total_seconds()
+    dt = native_interval_s(vals, datetimes)
+    expected = bin_seconds / dt if np.isfinite(dt) and dt > 0 else float("nan")
+
+    df = pd.DataFrame(
+        vals.T,
+        index=datetimes,
+        columns=households,
+    )
+    mean_df = df.resample(freq).mean()
+    count_df = df.resample(freq).count()
     if not np.isfinite(expected) or expected <= 0:
-        return xr.full_like(mean, np.nan)
-    coverage = valid_count / expected
-    return mean.where(coverage >= completeness)
+        gated_vals = np.full(mean_df.shape, np.nan)
+    else:
+        coverage = count_df.values / expected
+        gated_vals = np.where(coverage >= completeness, mean_df.values, np.nan)
+
+    gated = xr.DataArray(
+        gated_vals.T,
+        dims=["household_id", "datetime"],
+        coords={
+            "household_id": households,
+            "datetime": mean_df.index.values,
+        },
+    )
+    gated.attrs = dict(da.attrs)
+    gated.attrs["native_interval_s"] = dt
+    gated.attrs["expected_samples_per_bin"] = expected
+    gated.attrs["completeness_threshold"] = completeness
+    return gated
+
+
+def aggregate_variable_campaign(
+    da: xr.DataArray,
+    vals: np.ndarray,
+    completeness: float,
+) -> xr.DataArray:
+    """Aggregate a single variable across the campaign, gated by completeness.
+    Args:
+        da: original DataArray
+        vals: 2D numpy array of values
+        completeness: minimum required fraction of expected samples over the campaign
+    Returns:
+        gated campaign DataArray
+    """
+    datetimes = da["datetime"].values
+    households = da["household_id"].values
+    span_seconds = float(
+        (datetimes[-1] - datetimes[0]).astype("timedelta64[s]").astype(float)
+    )
+    dt = native_interval_s(vals, datetimes)
+    expected = span_seconds / dt if np.isfinite(dt) and dt > 0 else float("nan")
+
+    with np.errstate(all="ignore"):
+        mean_vals = np.nanmean(vals, axis=-1)
+        valid_count = np.sum(~np.isnan(vals), axis=-1)
+
+    if not np.isfinite(expected) or expected <= 0:
+        gated_vals = np.full(mean_vals.shape, np.nan)
+    else:
+        coverage = valid_count / expected
+        gated_vals = np.where(coverage >= completeness, mean_vals, np.nan)
+
+    gated = xr.DataArray(
+        gated_vals,
+        dims=["household_id"],
+        coords={"household_id": households},
+    )
+    gated.attrs = dict(da.attrs)
+    gated.attrs["native_interval_s"] = dt
+    gated.attrs["expected_samples_per_campaign"] = expected
+    gated.attrs["completeness_threshold"] = completeness
+    return gated
 
 
 def aggregate_binned(
-    ds_masked: xr.Dataset, freq: str, completeness: float
-) -> xr.Dataset:
+    ds: xr.Dataset,
+    measurement_vars: list[str],
+    freq: str,
+    completeness: float,
+) -> tuple[xr.Dataset, int]:
     """Resample every variable to a fixed period, gated by completeness.
     Args:
-        ds_masked: flag-masked measurement dataset
+        ds: merged xarray dataset
+        measurement_vars: measurement variables to aggregate
         freq: pandas resample frequency (e.g. "5min", "1h", "1D")
         completeness: minimum required fraction of expected samples per bin
     Returns:
-        aggregated xarray dataset on the resampled datetime grid
+        tuple of (aggregated xarray dataset on resampled grid, total masked records)
     """
-    bin_seconds = pd.Timedelta(freq).total_seconds()
     aggregated = {}
-    for v in ds_masked.data_vars:
-        da = ds_masked[v]
-        dt = native_interval_s(da)
-        expected = bin_seconds / dt if np.isfinite(dt) and dt > 0 else float("nan")
+    total_masked = 0
 
-        mean = da.resample(datetime=freq).mean()
-        valid_count = da.notnull().resample(datetime=freq).sum()
-        gated = gate_by_completeness(mean, valid_count, expected, completeness)
+    for v in measurement_vars:
+        da = ds[v]
+        vals, n_masked = apply_flags_to_var(ds, v)
+        total_masked += n_masked
+        aggregated[v] = resample_variable_binned(da, vals, freq, completeness)
 
-        gated.attrs = dict(da.attrs)
-        gated.attrs["native_interval_s"] = dt
-        gated.attrs["expected_samples_per_bin"] = expected
-        gated.attrs["completeness_threshold"] = completeness
-        aggregated[v] = gated
-    return xr.Dataset(aggregated)
+    return xr.Dataset(aggregated), total_masked
 
 
-def aggregate_campaign(ds_masked: xr.Dataset, completeness: float) -> xr.Dataset:
+def aggregate_campaign(
+    ds: xr.Dataset,
+    measurement_vars: list[str],
+    completeness: float,
+) -> tuple[xr.Dataset, int]:
     """Collapse the whole campaign to a single value per household, gated by completeness.
     Args:
-        ds_masked: flag-masked measurement dataset
+        ds: merged xarray dataset
+        measurement_vars: measurement variables to aggregate
         completeness: minimum required fraction of expected samples over the campaign
     Returns:
-        aggregated xarray dataset with the datetime dimension reduced away
+        tuple of (aggregated xarray dataset with datetime reduced away, total masked records)
     """
-    times = ds_masked["datetime"].values
-    span_seconds = float((times[-1] - times[0]).astype("timedelta64[s]").astype(float))
+    datetimes = ds["datetime"].values
     aggregated = {}
-    for v in ds_masked.data_vars:
-        da = ds_masked[v]
-        dt = native_interval_s(da)
-        expected = span_seconds / dt if np.isfinite(dt) and dt > 0 else float("nan")
+    total_masked = 0
 
-        mean = da.mean("datetime")
-        valid_count = da.notnull().sum("datetime")
-        gated = gate_by_completeness(mean, valid_count, expected, completeness)
+    for v in measurement_vars:
+        da = ds[v]
+        vals, n_masked = apply_flags_to_var(ds, v)
+        total_masked += n_masked
+        aggregated[v] = aggregate_variable_campaign(da, vals, completeness)
 
-        gated.attrs = dict(da.attrs)
-        gated.attrs["native_interval_s"] = dt
-        gated.attrs["expected_samples_per_campaign"] = expected
-        gated.attrs["completeness_threshold"] = completeness
-        aggregated[v] = gated
-
-    ds = xr.Dataset(aggregated)
-    ds.attrs["campaign_start"] = pd.Timestamp(times[0]).isoformat()
-    ds.attrs["campaign_end"] = pd.Timestamp(times[-1]).isoformat()
-    return ds
-
-
-def deployment_start(ds_masked: xr.Dataset) -> dict:
-    """Return the first datetime with any valid (non-NaN) data per household.
-
-    Reduces across all measurement variables so a household is considered
-    "deployed" from the moment its earliest sensor reports anything.
-    Args:
-        ds_masked: flag-masked measurement dataset with household_id and datetime dims
-    Returns:
-        dict mapping household_id → np.datetime64 (NaT if no valid data)
-    """
-    any_data = ds_masked.to_array(dim="variable").notnull().any("variable")
-    datetimes = ds_masked["datetime"].values
-    t0 = {}
-    for hh in ds_masked["household_id"].values:
-        mask = any_data.sel(household_id=hh).values
-        valid = datetimes[mask]
-        t0[hh] = valid[0] if len(valid) > 0 else np.datetime64("NaT")
-    return t0
+    ds_campaign = xr.Dataset(aggregated)
+    ds_campaign.attrs["campaign_start"] = pd.Timestamp(datetimes[0]).isoformat()
+    ds_campaign.attrs["campaign_end"] = pd.Timestamp(datetimes[-1]).isoformat()
+    return ds_campaign, total_masked
 
 
 def add_deployment_hours(ds_net: xr.Dataset, t0: dict, period: str) -> xr.Dataset:
@@ -285,20 +359,25 @@ def add_deployment_hours(ds_net: xr.Dataset, t0: dict, period: str) -> xr.Datase
 
 
 def aggregate(
-    ds_masked: xr.Dataset, period: str, freq: str, completeness: float
-) -> xr.Dataset:
+    ds: xr.Dataset,
+    measurement_vars: list[str],
+    period: str,
+    freq: str,
+    completeness: float,
+) -> tuple[xr.Dataset, int]:
     """Dispatch to binned or campaign-integrated aggregation.
     Args:
-        ds_masked: flag-masked measurement dataset
+        ds: merged xarray dataset
+        measurement_vars: measurement variables to aggregate
         period: period token ("5min", "1hour", "1day", "campaign")
         freq: pandas resample frequency, or "campaign" for the integrated case
         completeness: minimum required fraction of expected samples
     Returns:
-        aggregated xarray dataset
+        tuple of (aggregated xarray dataset, total masked records)
     """
     if period == "campaign":
-        return aggregate_campaign(ds_masked, completeness)
-    return aggregate_binned(ds_masked, freq, completeness)
+        return aggregate_campaign(ds, measurement_vars, completeness)
+    return aggregate_binned(ds, measurement_vars, freq, completeness)
 
 
 def update_metadata(
@@ -333,23 +412,23 @@ if __name__ == "__main__":
     ds = xr.open_dataset(snakemake.input.nc)
     log.info(f"Loaded {snakemake.input.nc}: {dict(ds.sizes)}")
 
-    # apply and drop flags
+    # select measurement vars
     measurement_vars = select_measurement_vars(ds)
-    ds_masked, n_masked = apply_flags(ds, measurement_vars)
-    ds_masked.attrs = dict(ds.attrs)
+
+    # deployment start per household (before aggregation collapses the time axis)
+    t0 = deployment_start(ds, measurement_vars)
+    log.info(f"Deployment starts: {dict((k, str(v)) for k, v in t0.items())}")
+
+    # aggregate with completeness gate
+    ds_net, n_masked = aggregate(ds, measurement_vars, period, freq, completeness)
+    ds_attrs = dict(ds.attrs)
+    ds.close()
     log.info(
         f"Kept {len(measurement_vars)} measurement vars, "
         f"masked {n_masked} flagged records"
     )
-
-    # deployment start per household (before aggregation collapses the time axis)
-    t0 = deployment_start(ds_masked)
-    log.info(f"Deployment starts: {dict((k, str(v)) for k, v in t0.items())}")
-
-    # aggregate with completeness gate
-    ds_net = aggregate(ds_masked, period, freq, completeness)
     ds_net = add_deployment_hours(ds_net, t0, period)
-    ds_net.attrs = {**dict(ds.attrs), **ds_net.attrs}
+    ds_net.attrs = {**ds_attrs, **ds_net.attrs}
     ds_net = update_metadata(ds_net, period, freq, completeness)
     log.info(f"Aggregated to {period}: {dict(ds_net.sizes)}")
 

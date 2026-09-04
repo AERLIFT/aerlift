@@ -30,7 +30,8 @@ tryCatch({
   df <- files %>%
     lapply(function(f) {
       message(paste("Reading:", f))
-      read_ast_log(f, update_names=TRUE, tz=timezone, cols_keep=cols_keep)
+      read_ast_log(f, update_names=TRUE, tz=timezone) %>%
+        dplyr::select(dplyr::any_of(cols_keep))
     }) %>%
     bind_rows()
   

@@ -22,6 +22,7 @@ rule network:
         completeness=config["network"]["completeness"],
     wildcard_constraints:
         period="|".join(PERIOD_FREQ),
+    threads: 2
     conda:
         "../envs/python.yaml"
     script:

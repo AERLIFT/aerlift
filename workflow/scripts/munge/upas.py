@@ -45,7 +45,7 @@ def load_upas(input_csv: str) -> pd.DataFrame:
     df = pd.read_csv(input_csv)
 
     # datetime
-    df.loc[:, "DateTimeUTC"] = (
+    df["DateTimeUTC"] = (
         pd.to_datetime(df["DateTimeUTC"], format="mixed")
         .dt.tz_localize("UTC")
         .dt.tz_localize(None)

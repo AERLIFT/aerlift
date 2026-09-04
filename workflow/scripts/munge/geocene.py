@@ -45,15 +45,15 @@ def read_geocene_file(file: str) -> pd.DataFrame:
     df = pd.read_csv(file)
 
     # Convert ISO8601 strings to datetime objects and remove timezone info (keep as UTC)
-    df["start_time"] = (
+    df["datetime"] = (
         pd.to_datetime(df["start_time"]).dt.tz_convert("UTC").dt.tz_localize(None)
     )
     df["stop_time"] = (
         pd.to_datetime(df["stop_time"]).dt.tz_convert("UTC").dt.tz_localize(None)
     )
 
-    # We might want to rename mission_id to sensor if that's the convention
-    df = df.rename(columns={"mission_id": "sensor"})
+    # Standardize column names to sensor and datetime
+    df = df.rename(columns={"mission_id": "sensor"}).drop(columns=["start_time"])
 
     return df
 
@@ -67,12 +67,7 @@ def process_geocene(input_file: str) -> xr.Dataset:
     """
     df = read_geocene_file(input_file)
 
-    # For events, we might have multiple events per sensor.
-    # Standard munged files seem to be sensor-datetime indexed.
-    # Since events have start and stop times, this is a bit different.
-    # However, to keep it consistent with the pipeline, we'll index by sensor and start_time.
-
-    df = df.set_index(["sensor", "start_time"])
+    df = df.set_index(["sensor", "datetime"])
     ds = df.to_xarray()
     return ds
 
@@ -97,6 +92,8 @@ def add_metadata(ds: xr.Dataset, params: Any) -> xr.Dataset:
         "institution": "UC Berkeley School of Public Health",
         "creator_name": "Mark Campmier, PhD",
     }
+    if getattr(params, "synthetic", None) == "true":
+        ds.attrs["SYNTHETIC"] = "true"
 
     ds["stop_time"].attrs = {
         "long_name": "event stop time",
@@ -126,7 +123,7 @@ if __name__ == "__main__":
     # summary csv
     summary = pd.DataFrame(
         {
-            "n_events": [ds_geocene.sizes["start_time"]],
+            "n_events": [ds_geocene.sizes["datetime"]],
             "n_sensors": [len(ds_geocene.coords["sensor"])],
             "event_kinds": [
                 ", ".join(

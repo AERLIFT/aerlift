@@ -52,7 +52,7 @@ def load_hhb(input_csv: str, alphasense: dict[str, str | None]) -> pd.DataFrame:
     df = pd.read_csv(input_csv)
 
     # datetime
-    df.loc[:, "DateTimeUTC"] = (
+    df["DateTimeUTC"] = (
         pd.to_datetime(df["DateTimeUTC"], format="mixed")
         .dt.tz_localize("UTC")
         .dt.tz_localize(None)
