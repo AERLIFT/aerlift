@@ -172,3 +172,20 @@ rule munge_upas:
         "../envs/python.yaml"
     script:
         "../scripts/munge/upas.py"
+
+rule munge_geocene:
+    input:
+        events=Path(config["raw_dir"]) / "geocene" / "events.csv",
+    output:
+        nc=Path(config["munged_dir"]) / "geocene.nc",
+        csv=Path(config["munged_dir"]) / "geocene_summary.csv",
+    log:
+        "logs/munge/geocene.log",
+    params:
+        raw_dir=config["raw_dir"],
+        timezone=config["campaign"]["timezone"],
+        synthetic=config.get("synthetic", "false"),
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/munge/geocene.py"
