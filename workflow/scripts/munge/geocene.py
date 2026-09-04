@@ -102,7 +102,6 @@ def add_metadata(ds: xr.Dataset, params: Any) -> xr.Dataset:
 
     ds["stop_time"].attrs = {
         "long_name": "event stop time",
-        "units": "seconds since 1970-01-01 00:00:00",
     }
     ds["event_kind"].attrs = {
         "long_name": "kind of event",
