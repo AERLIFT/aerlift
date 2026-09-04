@@ -344,7 +344,7 @@ if __name__ == "__main__":
 
     # deployment start per household (before aggregation collapses the time axis)
     t0 = deployment_start(ds_masked)
-    log.info(f"Deployment starts: { {k: str(v) for k, v in t0.items()} }")
+    log.info(f"Deployment starts: {dict((k, str(v)) for k, v in t0.items())}")
 
     # aggregate with completeness gate
     ds_net = aggregate(ds_masked, period, freq, completeness)

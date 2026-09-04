@@ -122,3 +122,20 @@ rule trim_aulifants:
         "../envs/python.yaml"
     script:
         "../scripts/trim.py"
+
+rule trim_geocene:
+    input:
+        nc=Path(config["munged_dir"]) / "geocene.nc",
+    output:
+        nc=Path(config["trimmed_dir"]) / "geocene.nc",
+    log:
+        "logs/trim/geocene.log",
+    params:
+        instrument="geocene",
+        start=config["campaign"]["start"],
+        end=config["campaign"]["end"],
+        exclude=config["exclude"]["geocene"],
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/trim.py"

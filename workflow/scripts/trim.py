@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 import logging
 import numpy as np
 import xarray as xr
-from typing import Any
+from typing import Any, Optional, List, Dict
 
 try:
     snakemake
@@ -36,8 +36,8 @@ log = logging.getLogger(__name__)
 
 # ── functions ─────────────────────────────────────────────────────────────────
 def get_encoding(
-    ds: xr.Dataset, skip_extra: list[str] | None = None
-) -> dict[str, dict]:
+    ds: xr.Dataset, skip_extra: Optional[List[str]] = None
+) -> Dict[str, Dict]:
     """Get encoding dict for netCDF file. Skips extra variables from lab samples (e.g., UPAS filters)
     Args:
         ds: xarray Dataset to trim by time-index

@@ -130,3 +130,20 @@ rule flag_aulifants:
         "../envs/python.yaml"
     script:
         "../scripts/flag/aulifants.py"
+
+rule flag_geocene:
+    input:
+        nc=Path(config["trimmed_dir"]) / "geocene.nc",
+    output:
+        nc=Path(config["flagged_dir"]) / "geocene.nc",
+        csv=Path(config["flagged_dir"]) / "geocene_flags.csv",
+    log:
+        "logs/flag/geocene.log",
+    params:
+        instrument="geocene",
+        flag_bits=config["flag"]["geocene"]["bits"],
+        thresholds=config["flag"]["geocene"]["thresholds"],
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/flag/geocene.py"

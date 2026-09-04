@@ -34,6 +34,8 @@ instruments:
     file_ext: '.csv'
   aulifants:
     file_ext: '.CSV'
+  geocene:
+    file_ext: '.csv'
   hhb:
     file_ext: '.csv'
     alphasense:
@@ -115,6 +117,7 @@ instruments:
 exclude:
   anemometer: []
   aranet:     ['16A28']
+  geocene:    []
   lascar:     []
   hhb:        []
   upas:       []
@@ -173,6 +176,9 @@ flag:
       voltage_min: 0.0
       voltage_max: 240.0
 
+  geocene:
+    bits: {}
+    thresholds: {}
 
   hhb:
     bits:

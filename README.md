@@ -13,6 +13,7 @@ Multi-instrument personal exposure monitoring pipeline built with Snakemake. Ing
 | Lascar EL-USB | CO | `.txt` |
 | Atmotube Pro | PM1/2.5/10, AQS, TVOC, NOx index, CO₂, temperature, RH, pressure, GPS | `.csv` |
 | Aulifants | Voltage, current, power, power factor, cumulative energy | `.CSV` |
+| Geocene | Cookstove use (cooking events) | `events.csv` |
 | Home Health Box (HHB v2) | PM, CO₂, NO₂, O₃, VOC, NOx, met | `.csv` |
 | UPAS v2.1 | PM (mass + number), met, light, accel | `.txt` |
  
@@ -54,6 +55,7 @@ aerlift/
 │   │   │   ├── lascar.py
 │   │   │   ├── atmotube.py
 │   │   │   ├── aulifants.py
+│   │   │   ├── geocene.py
 │   │   │   ├── hhb.R            # uses astr package
 │   │   │   ├── hhb.py
 │   │   │   ├── upas.R           # uses astr package
@@ -66,6 +68,7 @@ aerlift/
 │   │       ├── lascar.py
 │   │       ├── atmotube.py
 │   │       ├── aulifants.py
+│   │       ├── geocene.py
 │   │       ├── hhb.py
 │   │       └── upas.py
 │   └── envs/
@@ -90,6 +93,7 @@ data/
 │   ├── lascar/
 │   ├── atmotube/
 │   ├── aulifants/
+│   ├── geocene/
 │   ├── hhb/
 │   └── upas/
 ├── 1_munged/        # one .nc + summary .csv per instrument
@@ -119,44 +123,81 @@ Per-rule conda environments are defined in `workflow/envs/` and managed automati
  
 ## Docker Setup (Recommended)
 
-Docker bundles all Python and R dependencies into a single image — no conda, no manual environment setup. Requires [Docker Desktop](https://www.docker.com/products/docker-desktop/).
+Docker is the easiest way to run the pipeline because it bundles all dependencies (Python, R, and system libraries) into a single container. You don't need to worry about installing specific versions of Python or R on your computer.
 
-**1. Clone the repo**
+### Prerequisites
+1.  **Install Docker Desktop**: Download and install it for [Mac](https://www.docker.com/products/docker-desktop/), [Windows](https://www.docker.com/products/docker-desktop/), or [Linux](https://docs.docker.com/engine/install/).
+2.  **Open Docker Desktop**: Make sure it's running in the background.
 
+### Step-by-Step Setup
+
+**1. Get the Code**
+Open your terminal and run:
 ```bash
 git clone https://github.com/AERLIFT/aerlift.git
 cd aerlift
 ```
 
-**2. Configure your data path**
+**2. Point to Your Data**
+The pipeline looks for data in a folder on your computer. You tell Docker where this folder is using a `.env` file.
+1.  Create the file from the template:
+    ```bash
+    cp .env.example .env
+    ```
+2.  Open the `.env` file in a text editor.
+3.  Change `DATA_DIR` to the full path of your data folder (the one containing `0_raw/`):
+    *   *Example (Mac):* `DATA_DIR=/Users/name/Documents/aerlift-data`
+    *   *Example (Windows):* `DATA_DIR=C:/Users/name/Documents/aerlift-data`
+    *   *Note:* If your data is in iCloud, right-click the folder in Finder and select **"Keep Downloaded"** first.
 
-```bash
-cp .env.example .env
-```
-
-Edit `.env` and set `DATA_DIR` to the folder containing your `0_raw/` directory:
-
-```bash
-DATA_DIR=/path/to/your/data
-```
-
-If you just want to test the build without real data, leave it as `DATA_DIR=./data` and create an empty `data/` folder — the pipeline will build and validate the DAG, then fail gracefully with a missing-input message.
-
-**3. Run**
-
+**3. Start the Pipeline**
+Run the following command to build the environment and start processing:
 ```bash
 docker compose up
 ```
+*   **First Run**: Docker will download dependencies and build the image. This takes 10–15 minutes depending on your internet speed.
+*   **Subsequent Runs**: Starts instantly using the cached image.
 
-Docker builds the image on first run (10–15 minutes — conda env build). Subsequent runs use the cached image and start in seconds.
+### When to Update or Rebuild
 
-**Notes**
+As the project evolves, you'll need to update your local copy.
 
-- Raw data must be physically present on disk. If your data folder is in iCloud, right-click it in Finder → **Keep Downloaded** before running.
-- Anemometer files may be organized in subdirectories (e.g. `0_raw/anemometer/E102/`) — this is handled automatically.
-- All pipeline outputs are written back to your local `DATA_DIR` via the volume mount.
-- To run a dry-run without executing jobs: `docker compose run --rm aerlift snakemake --dry-run --cores 1`
-- The Docker image is rebuilt only when `Dockerfile` or `workflow/envs/*.yaml` change. Re-running `docker compose up` after a config or data change does not trigger a rebuild — Snakemake will only rerun rules whose inputs changed or outputs are missing.
+**1. Pulling Latest Changes**
+To get the latest code from GitHub:
+```bash
+git pull origin main
+```
+
+**2. Rebuilding the Container**
+If you pull new code and the `Dockerfile` or any files in `workflow/envs/` have changed, you **must** rebuild the container to update the internal dependencies:
+```bash
+docker compose build
+```
+*Tip: If things aren't working as expected after a `git pull`, try building again.*
+
+**3. Updating Configuration**
+If you edit `config/config.yaml`, you do **not** need to rebuild. Just run `docker compose up` again. Snakemake will automatically detect the changes and only rerun the necessary parts of the pipeline.
+
+### GitHub Actions
+This repository uses **GitHub Actions** to automatically build and test the Docker image whenever code is pushed to the main branch. This ensures that the environment is always stable and ready for use.
+
+---
+
+## Running Specific Commands
+
+Sometimes you might want to run a specific Snakemake command instead of the whole pipeline.
+
+```bash
+# Dry run: See what Snakemake would do without actually running it
+docker compose run --rm aerlift snakemake -n
+
+# Run a specific instrument only (e.g., Aranet)
+docker compose run --rm aerlift snakemake /aerlift/data/1_munged/aranet.nc
+
+# Unlock the directory (if a previous run crashed)
+docker compose run --rm aerlift snakemake --unlock
+```
+*Note: We use `--rm` to automatically clean up the temporary container after the command finishes.*
 
 ---
 
@@ -215,6 +256,7 @@ exclude:
   lascar:     []
   atmotube:   []
   aulifants:  []
+  geocene:    []
   hhb:        []
   upas:       []
  
